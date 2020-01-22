@@ -1,5 +1,5 @@
 <?php
-$langs_arr=['rus'];
+$langs_arr=['rus','eng'];
 foreach($langs_arr as $lang){
 	$input_file='index.'.$lang.'.php';
 	if(file_exists($input_file)){
@@ -103,11 +103,11 @@ foreach($langs_arr as $lang){
 		$main=str_replace('href="/favicon.ico"','href="data:image/x-icon;base64,'.$favicon_base64.'"',$main);
 
 		$main=preg_replace('~<a class="menu-el color-red" data-href="/market/">(.*)</a>~','',$main);
-		$main=preg_replace('~<a class="portable-version-action">(.*)</a>~','',$main);
+		$main=str_replace('portable-version-card ','portable-version-card hidden ',$main);
 		$main=preg_replace('~<div class="select-lang captions">(.*)</div>~','',$main);
 
 		$main=str_replace('var standalone=false;','var standalone=true;',$main);
-		$output_file='myvizplus'.('-'.$lang).'.html';
+		$output_file='my-viz-plus'.('-'.$lang).'.html';
 		file_put_contents($output_file,$main);
 		print '<div>'.$output_file.' ('.(round(filesize($output_file)/1024,2)).' Kb)</div>';
 	}
