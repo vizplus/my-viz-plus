@@ -1,5 +1,7 @@
 var api_nodes=[
+	'https://node.viz.plus/',
 	'https://vizrpc.lexa.host/',
+	'https://viz-node.dpos.space/',
 	'https://solox.world/',
 	'https://viz.lexa.host/',
 ];
@@ -169,11 +171,13 @@ var ltmp_arr={
 	fund_request_title_caption:'Заявка #<span class="request-id">%id%</span>',
 	fund_request_start_time_caption:'Создана: ',
 	fund_request_descr_caption:'Наименование: ',
+	fund_request_url_caption:'Ссылка: ',
 	fund_request_creator_caption:'Заявитель: ',
 	fund_request_worker_caption:'Исполнитель: ',
 	fund_request_min_amount_caption:'Минимальная сумма исполнения заявки: : ',
 	fund_request_max_amount_caption:'Запрашиваемая сумма: ',
 	fund_request_conclusion_time_caption:'Время рассмотрения: ',
+	fund_request_end_time_caption:'Время завершения: ',
 	fund_request_conclusion_payout_amount_caption:'Согласованная сумма: ',
 	fund_request_status_caption:'Статус: ',
 	fund_request_payout_amount_caption:'Выплачено: ',
@@ -388,10 +392,12 @@ function add_api_node(node){
 					}
 					else{
 						$('.nodes .add-api-node-error').html(ltmp_arr.node_wrong_response);
+						console.log(json);
 					}
 				}
 				catch(err){
 					$('.nodes .add-api-node-error').html(ltmp_arr.node_wrong_response);
+					console.log(err);
 				}
 				socket.close();
 			}
@@ -409,7 +415,7 @@ function add_api_node(node){
 			let latency_start=new Date().getTime();
 			let latency=-1;
 			xhr.overrideMimeType('text/plain');
-			xhr.open('GET',node);
+			xhr.open('POST',node);
 			xhr.setRequestHeader('accept','application/json, text/plain, */*');
 			xhr.setRequestHeader('content-type','application/json');
 			xhr.onreadystatechange = function() {
@@ -422,10 +428,13 @@ function add_api_node(node){
 						}
 						else{
 							$('.nodes .add-api-node-error').html(ltmp_arr.node_wrong_response);
+							console.log(json);
+							console.log(xhr);
 						}
 					}
 					catch(err){
 						$('.nodes .add-api-node-error').html(ltmp_arr.node_wrong_response);
+						console.log(err);
 					}
 				}
 			}
@@ -2795,7 +2804,7 @@ function update_fund_request(id,votes,votes_update){
 					descr=escape_html(descr);
 					data+=' <span class="adaptive-show-block"></span><span class="view-memo">'+descr+'</span>';
 				}
-				data+='<span class="adaptive-show-block"></span><span class="inline-button date grey small">'+((0==response.status)?'до '+show_date(response.end_time,true):show_date(response.conclusion_time,true))+ltmp_arr.default_date_utc+'</span>';
+				data+='<span class="adaptive-show-block"></span><span class="inline-button date grey small">'+((0==response.status)?'до '+show_date(response.end_time,true):show_date(response.conclusion_time,true))+ltmp_arr.default_date_utc+'</span>\n';
 				if(0==response.status){
 					data+='<span class="inline-button grey small">'+number_thousands(show_balance_in_tokens(response.required_amount_min))+'&ndash;'+number_thousands(show_balance_in_tokens(response.required_amount_max,true))+'</span>';
 				}
@@ -2898,12 +2907,15 @@ function update_fund_request(id,votes,votes_update){
 					let required_amount_max=response.required_amount_max;
 					data+='<p>'+ltmp_arr.fund_request_max_amount_caption+'<span class="request-required-amount-max">'+number_thousands(show_balance_in_tokens(response.required_amount_max,true))+'</span></p>';
 					if(response.status>0){
-						data+='<p>'+ltmp_arr.fund_request_conclusion_time_caption+'<span class="request-start-date">'+show_date(response.conclusion_time,true)+ltmp_arr.default_date_utc+'</span></p>';
+						data+='<p>'+ltmp_arr.fund_request_conclusion_time_caption+'<span class="request-conclusion-date">'+show_date(response.conclusion_time,true)+ltmp_arr.default_date_utc+'</span></p>';
 					}
 					if(response.status>2){
 						data+='<p>'+ltmp_arr.fund_request_conclusion_payout_amount_caption+'<span class="request-conclusion-payout-amount">'+number_thousands(show_balance_in_tokens(response.conclusion_payout_amount,true))+'</span></p>';
 					}
 					data+='<p>'+ltmp_arr.fund_request_status_caption+'<span class="request-status bold" rel="'+response.status+'">'+request_status_arr[response.status]+'</span></p>';
+					if(0==response.status){
+						data+='<p>'+ltmp_arr.fund_request_end_time_caption+'<span class="request-end-date">'+show_date(response.end_time,true)+ltmp_arr.default_date_utc+'</span></p>';
+					}
 					if(response.status>3){
 						data+='<p>'+ltmp_arr.fund_request_payout_amount_caption+'<span class="request-payout-amount">'+number_thousands(show_balance_in_tokens(response.payout_amount,true))+'</span></p>';
 					}
@@ -3712,7 +3724,7 @@ function fund_create_request(url,worker,min,max,duration,el){
 		page.find('.submit-button-ring').css('display','none');
 		return;
 	}
-	page.find('input[name=fund-create-request-duration]').val(parseInt(duration));
+	page.find('input[name=fund-create-request-duration]').val(duration);
 
 	let fixed_min=''+parseFloat(min).toFixed(3)+' VIZ';
 	if(''==min){
@@ -3722,7 +3734,7 @@ function fund_create_request(url,worker,min,max,duration,el){
 	if(''==max){
 		fixed_max='0.000 VIZ';
 	}
-
+	duration=duration*3600*24;
 	viz.broadcast.committeeWorkerCreateRequest(users[current_user].active_key,current_user,url,worker,fixed_min,fixed_max,duration,function(err,result) {
 		if(!err){
 			page.find('.fund-create-request-success').html('Заявка подана');
@@ -4870,6 +4882,10 @@ function app_mouse(e){
 	}
 	if($(target).hasClass('go-top')){
 		$('body,html').animate({scrollTop:0},1000);
+	}
+	if($(target).hasClass('fill-transfer-amount-action')){
+		let amount=parseFloat($(target).attr('data-raw'));
+		$('.page-transfer input[name=transfer-tokens-amount]').val(amount);
 	}
 	if($(target).hasClass('show-inactive-witnesses-action')){
 		$(target).addClass('hidden');
