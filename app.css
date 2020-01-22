@@ -1866,6 +1866,9 @@ input.simple-inline.red{
 .select-lang a:hover{
 	color:rgba(0,30,0,0.8);
 }
+.fill-transfer-amount-action{
+	cursor:pointer;
+}
 /* tablets */
 @media only screen and (min-width:0) and (max-width:968px){
 	.cards-menu{
@@ -2151,6 +2154,11 @@ input.simple-inline.red{
 	*/
 
 	/* adaptive white spaces */
+	.fund-requests .inline-button{
+		display:inline-block;
+		line-height:normal;
+		margin:0;
+	}
 	.fund-request .date{
 		margin-left:0;
 	}
