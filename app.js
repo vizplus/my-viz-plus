@@ -121,13 +121,17 @@ var ltmp_arr={
 	index_add_node_caption:'Добавить ноду:',
 	index_add_node_button:'Подтвердить',
 
+	/* Manage Profile */
+	save_profile_success:'Профиль успешно сохранен',
+
 	/* Access */
 	access_remove_caption:'удалить',
 	access_weight_caption:'вес %weight%',
 	access_need_regular_weight:'Суммарный вес для обычного типа доступа меньше необходимого',
 	access_need_active_weight:'Суммарный вес для активного типа доступа меньше необходимого',
 	access_need_master_weight:'Суммарный вес для главного типа доступа меньше необходимого',
-	access_saved_successfully:'Схема доступа успешно сохранена, обязательно скопируйте новые ключи.',
+	access_saved_successfully:'Схема доступа успешно сохранена',
+	access_save_keys:', обязательно скопируйте новые ключи',
 	access_error:'Ошибка в запросе, проверьте главный ключ и попробуйте позже',
 	access_invalid_master_weight_threshold:'Необходимый вес для главного типа доступа недействительный',
 	access_invalid_active_weight_threshold:'Необходимый вес для активного типа доступа недействительный',
@@ -202,7 +206,7 @@ var ltmp_arr={
 		create_account_delegation_time:'Срок делегирования при создании аккаунта (в секундах)',
 		bandwidth_reserve_percent:'Доля сети, выделяемая для резервной пропускной способности',
 		bandwidth_reserve_below:'Резервная пропускная способность действует для аккаунтов с долей сети до порога',
-		committee_request_approve_min_percent:'Минимальный процент суммы социального капитала, необходимый для принятия решения по заявке в Фонде ДАО',
+		committee_request_approve_min_percent:'Минимальная доля совокупного социального капитала для решения по заявке в Фонде ДАО',
 		min_delegation:'Минимальное количество токенов при делегировании',
 		vote_accounting_min_rshares:'Минимальный вес голоса для учёта при награждении (reward shares)',
 		maximum_block_size:'Максимальный размер блока в сети (в байтах)',
@@ -2196,7 +2200,98 @@ function view_accounts(path,params,title){
 						check_login_timer=setTimeout(check_login,500,$('.page-create-subaccount input[name=create-subaccount-login]'),$('.page-create-subaccount .create-subaccount-available'));
 					});
 				}
+				if('manage-profile'==path[2]){
+					$('.page-manage-profile input[name=manage-profile-nickname]').val('');
+					$('.page-manage-profile input[name=manage-profile-about]').val('');
+					$('.page-manage-profile input[name=manage-profile-avatar]').val('');
+					$('.page-manage-profile select[name=manage-profile-gender]').val('').change();
 
+					$('.page-manage-profile input[name=manage-profile-location]').val('');
+					$('.page-manage-profile input[name=manage-profile-interests]').val('');
+					$('.page-manage-profile input[name=manage-profile-site]').val('');
+					$('.page-manage-profile input[name=manage-profile-mail]').val('');
+
+					$('.page-manage-profile input[name=manage-profile-facebook]').val('');
+					$('.page-manage-profile input[name=manage-profile-instagram]').val('');
+					$('.page-manage-profile input[name=manage-profile-twitter]').val('');
+					$('.page-manage-profile input[name=manage-profile-vk]').val('');
+
+					$('.page-manage-profile input[name=manage-profile-telegram]').val('');
+					$('.page-manage-profile input[name=manage-profile-skype]').val('');
+					$('.page-manage-profile input[name=manage-profile-viber]').val('');
+					$('.page-manage-profile input[name=manage-profile-whatsapp]').val('');
+
+					$('.page-manage-profile .submit-button-ring').css('display','none');
+					$('.page-manage-profile .manage-profile-error').html('');
+					$('.page-manage-profile .manage-profile-success').html('');
+					$('.page-manage-profile .icon-check').css('display','none');
+
+					viz.api.getAccounts([current_user],function(err,response){
+						if(err){
+							$('.page-manage-profile .manage-profile-error').html('<p class="red">'+ltmp_arr.default_node_not_respond+'</p>');
+						}
+						else{
+							if(current_user==response[0].name){
+								let json_metadata=JSON.parse(response[0].json_metadata);
+								console.log(json_metadata);
+								if(typeof json_metadata.profile !== 'undefined'){
+									if(typeof json_metadata.profile.nickname !== 'undefined'){
+										$('.page-manage-profile input[name=manage-profile-nickname]').val(json_metadata.profile.nickname);
+									}
+									if(typeof json_metadata.profile.about !== 'undefined'){
+										$('.page-manage-profile input[name=manage-profile-about]').val(json_metadata.profile.about);
+									}
+									if(typeof json_metadata.profile.avatar !== 'undefined'){
+										$('.page-manage-profile input[name=manage-profile-avatar]').val(json_metadata.profile.avatar);
+									}
+									if(typeof json_metadata.profile.gender !== 'undefined'){
+										$('.page-manage-profile select[name=manage-profile-gender]').val(json_metadata.profile.gender);
+									}
+
+									if(typeof json_metadata.profile.location !== 'undefined'){
+										$('.page-manage-profile input[name=manage-profile-location]').val(json_metadata.profile.location);
+									}
+									if(typeof json_metadata.profile.interests !== 'undefined'){
+										$('.page-manage-profile input[name=manage-profile-interests]').val(json_metadata.profile.interests.join(', '));
+									}
+									if(typeof json_metadata.profile.site !== 'undefined'){
+										$('.page-manage-profile input[name=manage-profile-site]').val(json_metadata.profile.site);
+									}
+									if(typeof json_metadata.profile.mail !== 'undefined'){
+										$('.page-manage-profile input[name=manage-profile-mail]').val(json_metadata.profile.mail);
+									}
+
+									if(typeof json_metadata.profile.services !== 'undefined'){
+										if(typeof json_metadata.profile.services.facebook !== 'undefined'){
+											$('.page-manage-profile input[name=manage-profile-facebook]').val(json_metadata.profile.services.facebook);
+										}
+										if(typeof json_metadata.profile.services.instagram !== 'undefined'){
+											$('.page-manage-profile input[name=manage-profile-instagram]').val(json_metadata.profile.services.instagram);
+										}
+										if(typeof json_metadata.profile.services.twitter !== 'undefined'){
+											$('.page-manage-profile input[name=manage-profile-twitter]').val(json_metadata.profile.services.twitter);
+										}
+										if(typeof json_metadata.profile.services.vk !== 'undefined'){
+											$('.page-manage-profile input[name=manage-profile-vk]').val(json_metadata.profile.services.vk);
+										}
+										if(typeof json_metadata.profile.services.telegram !== 'undefined'){
+											$('.page-manage-profile input[name=manage-profile-telegram]').val(json_metadata.profile.services.telegram);
+										}
+										if(typeof json_metadata.profile.services.skype !== 'undefined'){
+											$('.page-manage-profile input[name=manage-profile-skype]').val(json_metadata.profile.services.skype);
+										}
+										if(typeof json_metadata.profile.services.viber !== 'undefined'){
+											$('.page-manage-profile input[name=manage-profile-viber]').val(json_metadata.profile.services.viber);
+										}
+										if(typeof json_metadata.profile.services.whatsapp !== 'undefined'){
+											$('.page-manage-profile input[name=manage-profile-whatsapp]').val(json_metadata.profile.services.whatsapp);
+										}
+									}
+								}
+							}
+						}
+					});
+				}
 				if('manage-access'==path[2]){
 					$('.page-manage-access input[name=manage-access-login]').val(current_user);
 					$('.page-manage-access input[name=manage-access-login]').unbind('keypress');
@@ -2543,12 +2638,22 @@ function view_assets(path,params,title){
 					$('.page-deposit input[name=deposit-account]').val(current_user);
 				}
 				if('stake-shares'==path[2]){
-					$('.page-stake-shares .submit-button-ring[rel=unstake]').css('display','none');
-					$('.page-stake-shares .icon-check[rel=unstake]').css('display','none');
-					$('.page-stake-shares .unstake-shares-error').html('');
-					$('.page-stake-shares .unstake-shares-success').html('');
+					$('.page-stake-shares .submit-button-ring[rel=stake]').css('display','none');
+					$('.page-stake-shares .icon-check[rel=stake]').css('display','none');
+					$('.page-stake-shares .stake-shares-error').html('');
+					$('.page-stake-shares .stake-shares-success').html('');
 					$('.page-stake-shares input[name=stake-shares-tokens-amount]').val('');
-
+					if(standalone){
+						$('.activate-viz-dollars').css('display','none');
+					}
+					else{
+						$('.activate-viz-dollars').css('display','block');
+						$('.page-stake-shares .submit-button-ring[rel=activate-viz-dollars]').css('display','none');
+						$('.page-stake-shares .icon-check[rel=activate-viz-dollars]').css('display','none');
+						$('.page-stake-shares .activate-viz-dollars-error').html('');
+						$('.page-stake-shares .activate-viz-dollars-success').html('');
+						$('.page-stake-shares input[name=activate-viz-dollars-code]').val('');
+					}
 					load_history($('.page-stake-shares .history'),false,true);
 				}
 				if('delegate-shares'==path[2]){
@@ -2671,41 +2776,43 @@ function update_witnesses_list(){
 						let data='';
 						let inactive_data='';
 						for(i in response){
+							let item_arr=response[i];
 							let item='';
 							let active=true;
-							if('VIZ1111111111111111111111111111111114T1Anm'==response[i].signing_key){
+							if('VIZ1111111111111111111111111111111114T1Anm'==item_arr.signing_key){
 								active=false;
 							}
-							let witness_account=response[i].owner;
+							let witness_account=item_arr.owner;
 							item+='<div class="witness-item captions'+(active?'':' inactive')+'">';
 							item+='<label class="check color-orange">'+witness_account+'<input type="checkbox" value="'+witness_account+'"'+(-1!=user_votes.indexOf(witness_account)?' checked="checked" title="'+ltmp(ltmp_arr.witness_unvote_caption,{witness:witness_account})+'"':' title="'+ltmp(ltmp_arr.witness_vote_caption,{witness:witness_account})+'"')+'><span class="mark"></span></label>';
 							item+=' <span class="witness-props-action inline-button grey small">'+ltmp_arr.witness_props_caption+'</span>';
-							if(-1==response[i].url.indexOf('https://')){
-								if(-1==response[i].url.indexOf('http://')){
-									response[i].url='https://'+response[i].url;
+							if(-1==item_arr.url.indexOf('https://')){
+								if(-1==item_arr.url.indexOf('http://')){
+									item_arr.url='https://'+item_arr.url;
 								}
 								else{
-									response[i].url='http://'+response[i].url;
+									item_arr.url='http://'+item_arr.url;
 								}
 							}
-							item+=' <a href="'+response[i].url+'" target="_blank" class="inline-button color-orange small">'+ltmp_arr.witness_url_caption+'</a>';
+							item+=' <a href="'+item_arr.url+'" target="_blank" class="inline-button color-orange small">'+ltmp_arr.witness_url_caption+'</a>';
 
-							item+=' <span class="inline-button grey small" title="'+ltmp_arr.witness_votes_weight_caption+'">'+number_thousands(Math.round(parseInt(response[i].votes/1000000)/100)/10)+'k</span>';
+							item+=' <span class="inline-button grey small" title="'+ltmp_arr.witness_votes_weight_caption+'">'+number_thousands(Math.round(parseInt(item_arr.votes/1000000)/100)/10)+'k</span>';
 							if(-1!=user_votes.indexOf(witness_account)){
 								item+=' <span class="inline-button color-green small vote-shares-value" title="'+ltmp_arr.witness_user_vote_weight_caption+'">+'+number_thousands(Math.round(parseInt(user_shares / user_votes.length)/100)/10)+'k</span>';
 							}
 							item+='<div class="witness-props">';
-							let new_hardfork=(parseInt(fast_str_replace('.','',response[i].running_version)) < parseInt(fast_str_replace('.','',response[i].hardfork_version_vote)));
-							item+=' <p>'+ltmp_arr.witness_node_version_caption+response[i].running_version+'</p>';
+							let new_hardfork=(parseInt(fast_str_replace('.','',item_arr.running_version)) < parseInt(fast_str_replace('.','',item_arr.hardfork_version_vote)));
+							item+=' <p>'+ltmp_arr.witness_node_version_caption+item_arr.running_version+'</p>';
 							if(new_hardfork){
-								item+=' <p>'+ltmp_arr.witness_hardfork_vote_caption+response[i].hardfork_version_vote+ltmp(ltmp.witness_hardfork_vote_starting_caption,{date:show_date(response[i].hardfork_time_vote,true)})+ltmp_arr.default_date_utc+'</p>';
+								item+=' <p>'+ltmp_arr.witness_hardfork_vote_caption+item_arr.hardfork_version_vote+ltmp(ltmp.witness_hardfork_vote_starting_caption,{date:show_date(item_arr.hardfork_time_vote,true)})+ltmp_arr.default_date_utc+'</p>';
 							}
-							item+='<p>'+ltmp_arr.witness_penalty_caption+'<strong>'+(parseInt(response[i].penalty_percent)/100)+'%</strong></p>';
-							delete(response[i].props['flag_energy_additional_cost']);
-							delete(response[i].props['min_curation_percent']);
-							delete(response[i].props['max_curation_percent']);
-							for(j in response[i].props){
-								item+='<p>'+witness_props_captions[j]+': <strong>'+(-1!==witness_props_percent.indexOf(j)?(parseInt(response[i].props[j])/100)+'%':response[i].props[j])+'</strong></p>';
+							item+='<p>'+ltmp_arr.witness_penalty_caption+'<strong>'+(parseInt(item_arr.penalty_percent)/100)+'%</strong></p>';
+							let props_item=item_arr.props;
+							for(j in props_item){
+								delete(props_item['flag_energy_additional_cost']);
+								delete(props_item['min_curation_percent']);
+								delete(props_item['max_curation_percent']);
+								item+='<p>'+witness_props_captions[j]+': <strong data-prop="'+j+'" data-value="'+props_item[j]+'">'+(-1!==witness_props_percent.indexOf(j)?(parseFloat(props_item[j])/100)+'%':props_item[j])+'</strong></p>';
 							}
 							item+='</div>';
 							item+='</div>';
@@ -3151,7 +3258,7 @@ function change_state(location,state,save_state){
 	$('body,html').animate({scrollTop:0},0);
 	var params=[];
 	var path=[];
-	var title='VIZ+';
+	var title='my VIZ+';
 
 	if(typeof state.path == 'undefined'){
 		if(-1!=location.indexOf('?')){
@@ -4416,15 +4523,18 @@ function manage_access_save(account,master_key,el){
 		}
 	}
 
-	txt_to_save='my.VIZ.plus\r\n\r\n';
-	txt_to_save+='Account: '+account+'\r\n\r\n';
-	txt_to_save+='New authorites\r\n';
-	html_to_show='<p class="captions">Account: <strong>'+account+'</strong></p>';
-	for(i in to_save){
-		txt_to_save+=to_save[i][0]+': '+to_save[i][1]+'\r\n';
-		html_to_show+='<p class="captions">'+to_save[i][0]+': <strong>'+to_save[i][1]+'</strong></p>';
+	let txt_to_save='';
+	if(0<to_save.length){
+		txt_to_save='my.VIZ.plus\r\n\r\n';
+		txt_to_save+='Account: '+account+'\r\n\r\n';
+		txt_to_save+='New authorites\r\n';
+		html_to_show='<p class="captions">Account: <strong>'+account+'</strong></p>';
+		for(i in to_save){
+			txt_to_save+=to_save[i][0]+': '+to_save[i][1]+'\r\n';
+			html_to_show+='<p class="captions">'+to_save[i][0]+': <strong>'+to_save[i][1]+'</strong></p>';
+		}
+		txt_to_save=txt_to_save.trim();
 	}
-	txt_to_save=txt_to_save.trim();
 
 	el.find('.manage-access-save-action').attr('disabled','disabled');
 	el.find('.icon-check[rel=save]').css('display','none');
@@ -4432,7 +4542,7 @@ function manage_access_save(account,master_key,el){
 
 	viz.broadcast.accountUpdate(master_key,account,master,active,regular,memo_key,json_metadata,function(err,result){
 		if(result){
-			el.find('.manage-access-save-success').html(ltmp_arr.access_saved_successfully);
+			el.find('.manage-access-save-success').html(ltmp_arr.access_saved_successfully+(0<to_save.length?ltmp_arr.access_save_keys:''));
 			el.find('.manage-access-save-error').html('');
 
 			el.find('.submit-button-ring[rel=save]').css('display','none');
@@ -4440,9 +4550,10 @@ function manage_access_save(account,master_key,el){
 			el.find('input[name=manage-access-master-key]').val('');
 			el.find('.manage-access-save-action').removeAttr('disabled');
 
-			el.find('.manage-access-new-keys').html(html_to_show);
-
-			download('viz-access.txt',txt_to_save);
+			if(0<to_save.length){
+				el.find('.manage-access-new-keys').html(html_to_show);
+				download('viz-access.txt',txt_to_save);
+			}
 		}
 		else{
 			el.find('.manage-access-save-error').html(ltmp_arr.access_error);
@@ -4598,6 +4709,175 @@ function manage_access_preload(account,el){
 			el.find('.manage-access-preload-action').removeAttr('disabled');
 		}
 	});
+}
+function save_profile(el){
+	el.find('.manage-profile-error').html('');
+	el.find('.manage-profile-success').html('');
+	el.find('.manage-profile-action').attr('disabled','disabled');
+	el.find('.icon-check').css('display','none');
+	el.find('.submit-button-ring').css('display','inline-block');
+
+	viz.api.getAccounts([current_user],function(err,response){
+		if(err){
+			el.find('.manage-profile-error').html('<p class="red">'+ltmp_arr.default_node_not_respond+'</p>');
+		}
+		else{
+			if(typeof response[0] !== 'undefined'){
+				if(current_user==response[0].name){
+					let json_metadata=JSON.parse(response[0].json_metadata);
+					console.log(json_metadata);
+					if(typeof json_metadata.profile === 'undefined'){
+						json_metadata.profile={};
+					}
+					json_metadata.profile.nickname=el.find('input[name=manage-profile-nickname]').val().trim();
+					json_metadata.profile.about=el.find('input[name=manage-profile-about]').val().trim();
+					json_metadata.profile.avatar=el.find('input[name=manage-profile-avatar]').val().trim();
+					json_metadata.profile.gender=el.find('select[name=manage-profile-gender]').val().trim();
+
+					json_metadata.profile.location=el.find('input[name=manage-profile-location]').val().trim();
+					json_metadata.profile.interests=el.find('input[name=manage-profile-interests]').val().trim().split(',');
+
+					for(var i=0;i<json_metadata.profile.interests.length;i++){
+						json_metadata.profile.interests[i] = json_metadata.profile.interests[i].trim();
+					}
+					for(var i=(json_metadata.profile.interests.length - 1);i>0;--i){
+						if(''==json_metadata.profile.interests[i]){
+							json_metadata.profile.interests.splice(i,1);
+						}
+					}
+					if(json_metadata.profile.interests.length==0){
+						delete json_metadata.profile.interests;
+					}
+
+					json_metadata.profile.site=el.find('input[name=manage-profile-site]').val().trim();
+					json_metadata.profile.mail=el.find('input[name=manage-profile-mail]').val().trim();
+					if(typeof json_metadata.profile.services === 'undefined'){
+						json_metadata.profile.services={};
+					}
+					json_metadata.profile.services={};
+
+					if(''==el.find('input[name=manage-profile-facebook]').val().trim()){
+						if(typeof json_metadata.profile.services.facebook !== 'undefined'){
+							delete json_metadata.profile.services.facebook;
+						}
+					}
+					else{
+						json_metadata.profile.services.facebook=el.find('input[name=manage-profile-facebook]').val().trim();
+					}
+
+					if(''==el.find('input[name=manage-profile-instagram]').val().trim()){
+						if(typeof json_metadata.profile.services.instagram !== 'undefined'){
+							delete json_metadata.profile.services.instagram;
+						}
+					}
+					else{
+						json_metadata.profile.services.instagram=el.find('input[name=manage-profile-instagram]').val().trim();
+					}
+
+					if(''==el.find('input[name=manage-profile-twitter]').val().trim()){
+						if(typeof json_metadata.profile.services.twitter !== 'undefined'){
+							delete json_metadata.profile.services.twitter;
+						}
+					}
+					else{
+						json_metadata.profile.services.twitter=el.find('input[name=manage-profile-twitter]').val().trim();
+					}
+
+					if(''==el.find('input[name=manage-profile-vk]').val().trim()){
+						if(typeof json_metadata.profile.services.vk !== 'undefined'){
+							delete json_metadata.profile.services.vk;
+						}
+					}
+					else{
+						json_metadata.profile.services.vk=el.find('input[name=manage-profile-vk]').val().trim();
+					}
+
+					if(''==el.find('input[name=manage-profile-telegram]').val().trim()){
+						if(typeof json_metadata.profile.services.telegram !== 'undefined'){
+							delete json_metadata.profile.services.telegram;
+						}
+					}
+					else{
+						json_metadata.profile.services.telegram=el.find('input[name=manage-profile-telegram]').val().trim();
+					}
+
+					if(''==el.find('input[name=manage-profile-skype]').val().trim()){
+						if(typeof json_metadata.profile.services.skype !== 'undefined'){
+							delete json_metadata.profile.services.skype;
+						}
+					}
+					else{
+						json_metadata.profile.services.skype=el.find('input[name=manage-profile-skype]').val().trim();
+					}
+
+					if(''==el.find('input[name=manage-profile-viber]').val().trim()){
+						if(typeof json_metadata.profile.services.viber !== 'undefined'){
+							delete json_metadata.profile.services.viber;
+						}
+					}
+					else{
+						json_metadata.profile.services.viber=el.find('input[name=manage-profile-viber]').val().trim();
+					}
+
+					if(''==el.find('input[name=manage-profile-whatsapp]').val().trim()){
+						if(typeof json_metadata.profile.services.whatsapp !== 'undefined'){
+							delete json_metadata.profile.services.whatsapp;
+						}
+					}
+					else{
+						json_metadata.profile.services.whatsapp=el.find('input[name=manage-profile-whatsapp]').val().trim();
+					}
+
+					if(Object.keys(json_metadata.profile.services).length==0){
+						delete json_metadata.profile.services;
+					}
+
+					if(''==json_metadata.profile.location){
+						delete json_metadata.profile.location;
+					}
+					if(''==json_metadata.profile.site){
+						delete json_metadata.profile.site;
+					}
+					if(''==json_metadata.profile.mail){
+						delete json_metadata.profile.mail;
+					}
+
+					let new_json_metadata=JSON.stringify(json_metadata);
+
+					console.log(new_json_metadata);
+					viz.broadcast.accountMetadata(users[current_user].active_key,current_user,json_metadata,function(err,result){
+						if(result){
+							el.find('.manage-profile-success').html(ltmp_arr.save_profile_success);
+							el.find('.manage-profile-error').html('');
+
+							el.find('.submit-button-ring').css('display','none');
+							el.find('.icon-check').css('display','inline-block');
+							el.find('.manage-profile-action').removeAttr('disabled');
+
+						}
+						else{
+							el.find('.manage-profile-error').html(ltmp_arr.default_operation_error);
+							el.find('.submit-button-ring').css('display','none');
+							el.find('.manage-profile-action').removeAttr('disabled');
+
+							console.log(err);
+						}
+					});
+				}
+				else{
+					el.find('.manage-profile-error').html(ltmp_arr.default_account_not_found_or_incorrect_response);
+					el.find('.submit-button-ring').css('display','none');
+					el.find('.manage-profile-action').removeAttr('disabled');
+				}
+			}
+			else{
+				el.find('.manage-profile-error').html(ltmp_arr.default_account_not_found_or_incorrect_response);
+				el.find('.submit-button-ring').css('display','none');
+				el.find('.manage-profile-action').removeAttr('disabled');
+			}
+		}
+	});
+	let nickname=$('.page-manage-profile input[name=manage-profile-nickname]').val().trim();
 }
 function reset_access(account,master_key,el){
 	if(!viz.auth.isWif(master_key)){
@@ -5090,6 +5370,49 @@ function app_mouse(e){
 		let code=$('.page-invites input[name=invites-claim-code]').val().trim();
 		claim_invite(code,target);
 	}
+	if($(target).hasClass('activate-viz-dollars-action')){
+		var error=false;
+		var account=current_user;
+		var code=$('.page-stake-shares input[name=activate-viz-dollars-code]').val().trim();
+		$(target).attr('disabled','disabled');
+		$('.page-stake-shares .submit-button-ring[rel=activate-viz-dollars]').css('display','inline-block');
+		$('.page-stake-shares .icon-check[rel=activate-viz-dollars]').css('display','none');
+		$('.page-stake-shares .activate-viz-dollars-error').html('');
+		$('.page-stake-shares .activate-viz-dollars-success').html('');
+		$.ajax({
+			type:'POST',
+			url:'https://start.viz.plus/ajax/claim-code/',
+			data:{account_login:account,code},
+			success:function(result){
+				result_json=JSON.parse(result);
+				if('too much attempts'==result_json.result){
+					error=ltmp_arr.deposit_too_much_attempts;
+					$('.page-stake-shares .activate-viz-dollars-error').html(error);
+				}
+				if('claimed code'==result_json.result){
+					error=ltmp_arr.deposit_claimed_code;
+					$('.page-stake-shares .activate-viz-dollars-error').html(error);
+				}
+				if('incorrect code'==result_json.result){
+					error=ltmp_arr.deposit_incorrect_code;
+					$('.page-stake-shares .activate-viz-dollars-error').html(error);
+				}
+				if('broadcast error'==result_json.result){
+					error=ltmp_arr.deposit_broadcast_error;
+					$('.page-stake-shares .activate-viz-dollars-error').html(error);
+				}
+				if('success'==result_json.result){
+					$('.page-stake-shares .activate-viz-dollars-error').html('');
+					$('.page-stake-shares .activate-viz-dollars-success').html(ltmp_arr.deposit_success);
+
+					update_balances($('.page-stake-shares .account-balance'));
+					$('.page-stake-shares .icon-check[rel=activate-viz-dollars]').css('display','inline-block');
+				}
+				$(target).removeAttr('disabled');
+				$('.page-stake-shares .submit-button-ring[rel=activate-viz-dollars]').css('display','none');
+			},
+		});
+	}
 	if($(target).hasClass('deposit-action')){
 		var error=false;
 		var account=$('.page-deposit input[name=deposit-account]').val().toLowerCase().trim();
@@ -5202,6 +5525,9 @@ function app_mouse(e){
 			let on_sale=('true'==$('.page-sell-account input[name=set-account-on-sale]:checked').val())
 			set_account_price(account,master_key,seller,offer_price,on_sale,$('.page-sell-account'));
 		}
+	}
+	if($(target).hasClass('manage-profile-action')){
+		save_profile($('.page-manage-profile'));
 	}
 	if($(target).hasClass('reset-access-action')){
 		let account=$('.page-reset-access input[name=reset-access-login]').val().toLowerCase().trim();
