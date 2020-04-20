@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-	<title>VIZ+</title>
+	<title>my VIZ+</title>
 	<meta name="description" content="My VIZ+ manager: wallet, services, DAO">
 	<meta property="og:description" content="My VIZ+ manager: wallet, services, DAO">
 	<meta name="twitter:description" content="My VIZ+ manager: wallet, services, DAO">
@@ -50,7 +50,7 @@
 	<div class="cards-view">
 		<div class="cards-container">
 			<div class="view view-index">
-				<div class="card small-borders text-right grey">
+				<div class="card portable-version-card small-borders text-right grey">
 						Доступна автономная версия сайта. <a class="grey" data-href="/portable/">Подробнее&hellip;</a>
 				</div>
 				<div class="card">
@@ -152,7 +152,7 @@
 					<div class="card transparent">
 						<h3 class="adaptive-show-block">Аккаунты</h3>
 						<div class="columns-view">
-							<div class="column column-2 shadow">
+							<div class="column column-2 shadow grid">
 								<h4 class="center captions">Создать</h4>
 								<!--<div class="icon icon-wide icon-150px icon-color-blue icon-add-account"></div>-->
 								<div class="wide-buttons captions">
@@ -160,12 +160,14 @@
 									<a class="wide-button" data-href="/accounts/create-subaccount/">Субаккаунт</a>
 								</div>
 							</div>
-							<div class="column column-2 shadow">
+							<div class="column column-2 shadow grid">
 								<h4 class="center captions">Управлять</h4>
 								<!--<div class="icon icon-wide icon-150px icon-color-blue icon-config-account"></div>-->
 								<div class="wide-buttons captions">
 									<a class="wide-button" data-href="/accounts/reset-access/">Сбросить ключи</a>
 									<a class="wide-button" data-href="/accounts/manage-access/">Доступы аккаунта</a>
+									<a class="wide-button" data-href="/accounts/manage-profile/">Изменить профиль</a>
+
 								</div>
 							</div>
 						</div>
@@ -321,6 +323,128 @@
 						</div>
 
 						<div class="addon captions"><h3>Подсказка</h3><p>Если вы хотите настроить управление аккаунтом для мульти-подписи, перейдите в подраздел <a data-href="/accounts/manage-access/">«Доступы аккаунта»</a>.</p></div>
+
+						<p><hr><a data-href="/accounts/">&larr; Вернуться</a></p>
+					</div>
+				</div>
+				<div class="page page-manage-profile" data-title="Изменить профиль">
+					<div class="card">
+						<h3>Изменить профиль</h3>
+						<p>Заполните профиль и сохраните его в блокчейн (ни одно поле не является обязательным).</p>
+						<p>
+							<label class="input-descr">
+								<span class="input-caption">Имя:</span>
+								<input type="text" name="manage-profile-nickname" class="simple-rounded">
+							</label>
+						</p>
+						<p>
+							<label class="input-descr">
+								<span class="input-caption">Немного о себе:</span>
+								<input type="text" name="manage-profile-about" maxlength="200" class="simple-rounded wide">
+							</label>
+						</p>
+						<p>
+							<label class="input-descr">
+								<span class="input-caption">Аватар (ссылка на изображение):</span>
+								<input type="text" name="manage-profile-avatar" placeholder="https://" class="simple-rounded wide">
+							</label>
+						</p>
+						<p>
+							<label class="input-descr">
+								<span class="input-caption">Пол:</span>
+								<select name="manage-profile-gender" class="simple-rounded simple-rounded-size">
+									<option value="" selected>Не указан</option>
+									<option value="male" selected="">Мужской</option>
+									<option value="female">Женский</option>
+									<option value="robot">Робот</option>
+								</select>
+							</label>
+						</p>
+
+						<p>
+							<label class="input-descr">
+								<span class="input-caption">Город, страна:</span>
+								<input type="text" name="manage-profile-location" class="simple-rounded wide">
+							</label>
+						</p>
+						<p>
+							<label class="input-descr">
+								<span class="input-caption">Интересы (через запятую):</span>
+								<input type="text" name="manage-profile-interests" class="simple-rounded wide">
+							</label>
+						</p>
+
+						<p>
+							<label class="input-descr">
+								<span class="input-caption">Сайт:</span>
+								<input type="text" name="manage-profile-site" class="simple-rounded">
+							</label>
+						</p>
+						<p>
+							<label class="input-descr">
+								<span class="input-caption">Email:</span>
+								<input type="text" name="manage-profile-mail" class="simple-rounded">
+							</label>
+						</p>
+
+						<p>
+							<label class="input-descr">
+								<span class="input-caption">Facebook:</span>
+								<input type="text" name="manage-profile-facebook" class="simple-rounded" placeholder="аккаунт">
+							</label>
+						</p>
+						<p>
+							<label class="input-descr">
+								<span class="input-caption">Instagram:</span>
+								<input type="text" name="manage-profile-instagram" class="simple-rounded" placeholder="аккаунт">
+							</label>
+						</p>
+						<p>
+							<label class="input-descr">
+								<span class="input-caption">Twitter:</span>
+								<input type="text" name="manage-profile-twitter" class="simple-rounded" placeholder="аккаунт">
+							</label>
+						</p>
+						<p>
+							<label class="input-descr">
+								<span class="input-caption">VK:</span>
+								<input type="text" name="manage-profile-vk" class="simple-rounded" placeholder="аккаунт">
+							</label>
+						</p>
+						<p>
+							<label class="input-descr">
+								<span class="input-caption">Telegram:</span>
+								<input type="text" name="manage-profile-telegram" class="simple-rounded" placeholder="аккаунт">
+							</label>
+						</p>
+						<p>
+							<label class="input-descr">
+								<span class="input-caption">Skype:</span>
+								<input type="text" name="manage-profile-skype" class="simple-rounded" placeholder="аккаунт">
+							</label>
+						</p>
+						<p>
+							<label class="input-descr">
+								<span class="input-caption">Viber:</span>
+								<input type="text" name="manage-profile-viber" class="simple-rounded" placeholder="аккаунт">
+							</label>
+						</p>
+						<p>
+							<label class="input-descr">
+								<span class="input-caption">WhatsApp:</span>
+								<input type="text" name="manage-profile-whatsapp" class="simple-rounded" placeholder="аккаунт">
+							</label>
+						</p>
+
+						<p class="red manage-profile-error"></p>
+						<p class="green manage-profile-success"></p>
+						<p>
+							<input class="manage-profile-action blue-button captions" type="button" value="Сохранить">
+							<span class="submit-button-ring"></span>
+							<span class="icon icon-margin hidden icon-color-blue icon-check"></span>
+						</p>
+
+						<div class="addon captions"><h3>Подсказка</h3><p>Все отправляемые данные будут записаны в блокчейн и не могут быть удалены, но вы можете их изменить в любой момент.</p></div>
 
 						<p><hr><a data-href="/accounts/">&larr; Вернуться</a></p>
 					</div>
@@ -526,9 +650,25 @@
 						<p class="green stake-shares-success"></p>
 						<p>
 							<input class="stake-shares-action green-button captions" type="button" value="Подтвердить">
-							<span class="submit-button-ring"></span>
-							<span class="icon icon-margin hidden icon-color-green icon-check"></span>
+							<span class="submit-button-ring" rel="stake"></span>
+							<span class="icon icon-margin hidden icon-color-green icon-check" rel="stake"></span>
 						</p>
+						<div class="activate-viz-dollars">
+							<hr>
+							<p>
+								<label class="input-descr">
+									<span class="input-caption">Код для погашения виз-долларов:</span>
+									<input type="text" name="activate-viz-dollars-code" class="simple-rounded" placeholder="...">
+								</label>
+							</p>
+							<p class="red activate-viz-dollars-error"></p>
+							<p class="green activate-viz-dollars-success"></p>
+							<p>
+								<input class="activate-viz-dollars-action green-button captions" type="button" value="Погасить виз-доллары">
+								<span class="submit-button-ring" rel="activate-viz-dollars"></span>
+								<span class="icon icon-margin hidden icon-color-green icon-check" rel="activate-viz-dollars"></span>
+							</p>
+						</div>
 
 						<div class="addon captions"><h3>Подсказка</h3><p>Вы можете увеличить социальный капитал переводом токенов viz со своего баланса. Обратное действие занимает до 28 дней.</p></div>
 
@@ -714,14 +854,14 @@
 					<div class="card">
 						<h3>Перевести</h3>
 						<div class="account-balance captions">
-							<div>Баланс: <span rel="token">&hellip;</span> viz</div>
+							<div>Баланс: <span rel="token" class="fill-transfer-amount-action cursor">&hellip;</span> viz</div>
 						</div>
 						<p>
 							<label class="input-descr">
 								<span class="input-caption">Шаблон:</span>
 								<select name="transfer-template" class="simple-rounded simple-rounded-size">
 									<option value="0" selected>Не используется</option>
-									<option value="1" data-account="xchng" data-tokens-amount-fee="5" data-memo="log:" data-memo-format="log:BITSHARES-LOGIN" data-memo-check="^log:([a-z0-9\-]*)$">XCHNG на BitShares</option>
+									<option value="1" data-account="xchng" data-tokens-amount-fee="5" data-memo="log:" data-memo-format="log:BITSHARES-LOGIN" data-memo-check="^log:([a-z0-9\-\.]*)$">XCHNG на BitShares</option>
 								</select>
 							</label>
 						</p>
