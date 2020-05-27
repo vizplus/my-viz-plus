@@ -620,7 +620,7 @@
 								<div class="tokens-caption captions"><span class="value">&hellip;</span><span class="symbol"> viz</span></div>
 								<div class="wide-buttons captions">
 									<a class="wide-button color-green" data-href="/assets/transfer/">Перевести</a>
-									<a class="wide-button color-green" data-href="/assets/invites/">Чеки</a>
+									<a class="wide-button color-green" data-href="/assets/checks/">Чеки</a>
 								</div>
 							</div>
 							<div class="column column-3 shadow">
@@ -653,6 +653,7 @@
 							<span class="submit-button-ring" rel="stake"></span>
 							<span class="icon icon-margin hidden icon-color-green icon-check" rel="stake"></span>
 						</p>
+						<!--
 						<div class="activate-viz-dollars">
 							<hr>
 							<p>
@@ -669,8 +670,9 @@
 								<span class="icon icon-margin hidden icon-color-green icon-check" rel="activate-viz-dollars"></span>
 							</p>
 						</div>
+						-->
 
-						<div class="addon captions"><h3>Подсказка</h3><p>Вы можете увеличить социальный капитал переводом токенов viz со своего баланса. Обратное действие занимает до 28 дней.</p></div>
+						<div class="addon captions"><h3>Подсказка</h3><p>Вы можете увеличить социальный капитал переводом токенов viz со своего баланса. Обратное действие занимает до <span class="median-props" rel="withdraw_intervals">&hellip;</span> дней.</p></div>
 
 						<p><hr><a data-href="/assets/">&larr; Вернуться</a></p>
 
@@ -750,7 +752,7 @@
 							<span class="icon icon-margin hidden icon-color-green icon-check" rel="unstake"></span>
 						</p>
 
-						<div class="addon captions"><h3>Подсказка</h3><p>Уменьшение социального капитала происходит частями по 1/28 от всего доступного капитала в сутки с момента активации уменьшения.</p></div>
+						<div class="addon captions"><h3>Подсказка</h3><p>Уменьшение социального капитала происходит частями по 1/<span class="median-props" rel="withdraw_intervals">&hellip;</span> от всего доступного капитала в сутки с момента активации уменьшения.</p></div>
 
 						<p><hr><a data-href="/assets/">&larr; Вернуться</a></p>
 
@@ -909,7 +911,7 @@
 						</div>
 					</div>
 				</div>
-				<div class="page page-invites" data-title="Чеки">
+				<div class="page page-checks" data-title="Чеки">
 					<div class="card">
 						<h3>Чеки</h3>
 						<div class="account-balance captions">
@@ -919,6 +921,7 @@
 							<label class="input-descr">
 								<span class="input-caption">Сумма:</span>
 								<input type="text" name="invites-create-amount" class="simple-rounded" placeholder="0.00 viz">
+								<span class="input-caption text-small grey captions">(минимум: <span class="create-invite-min-balance">&hellip;</span>)</span>
 							</label>
 						</p>
 						<p class="red invites-create-error"></p>
@@ -940,7 +943,8 @@
 						<p class="red invites-claim-error"></p>
 						<p class="green invites-claim-success"></p>
 						<p>
-							<input class="invites-claim-action green-button captions" type="button" value="Погасить чек">
+							<input class="invites-claim-action green-button captions" type="button" value="Погасить чек в кошелёк">
+							<input class="invites-use-action green-button captions" type="button" value="Погасить чек в капитал">
 							<span class="submit-button-ring" rel="claim"></span>
 							<span class="icon icon-margin hidden icon-color-green icon-check" rel="claim"></span>
 						</p>
@@ -953,7 +957,7 @@
 							<div class="table-header">
 								<h3>Чековая книжка <span class="loading">Загрузка&hellip;</span></h3>
 							</div>
-							<div class="table-data history" data-operations="create_invite,claim_invite_balance" data-lower-bound="" data-upper-bound="">
+							<div class="table-data history" data-operations="create_invite,claim_invite_balance,use_invite_balance" data-lower-bound="" data-upper-bound="">
 							</div>
 							<div class="table-footer">
 								<a class="inline-button history-load-more-action">Загрузить ещё &#10140;</a>
@@ -1079,6 +1083,7 @@
 								<span class="input-caption text-small grey captions witness-setup-signing-key-action">(сгенерировать: <span class="witness-setup-signing-private-key">&mdash;</span>)</span>
 							</label>
 						</p>
+						<label class="check color-red fee-checkbox">При объявлении аккаунта делегатом с вашего кошелька будет списано <span class="median-props" rel="witness_declaration_fee">&hellip; viz</span>.<input type="checkbox" name="witness-declaration-fee"><span class="mark"></span></label>
 						<p class="red witness-setup-error"></p>
 						<p class="green witness-setup-success"></p>
 						<p>
@@ -1135,6 +1140,7 @@
 								<input type="text" name="fund-create-request-duration" class="simple-rounded" placeholder="0">
 							</label>
 						</p>
+						<label class="check color-red fee-checkbox">При создании заявки с вашего кошелька будет списано <span class="median-props" rel="committee_create_request_fee">&hellip; viz</span>.<input type="checkbox" name="committee-create-request-fee"><span class="mark"></span></label>
 						<p class="red fund-create-request-error"></p>
 						<p class="green fund-create-request-success"></p>
 						<p>
@@ -1160,7 +1166,7 @@
 								<div>Баланс фонда: <span class="fund-balance">&hellip;</span></div>
 							</div>
 							<div class="fund-requests fund-active-requests" data-status="0"></div>
-							<p><a class="inline-button color-orange no-margin fund-show-others-requests captions">Показать другие заявки &rarr;</a></p>
+							<p><hr><a class="inline-button color-orange no-margin fund-show-others-requests captions">Показать другие заявки &rarr;</a></p>
 							<div class="fund-others">
 								<div class="fund-requests fund-approved-requests" data-status="4"><h3>Одобренные заявки</h3></div>
 								<div class="fund-requests fund-paid-requests" data-status="5"><h3>Выплаченные заявки</h3></div>
@@ -1211,7 +1217,7 @@
 								<div class="wide-buttons captions">
 									<a class="wide-button color-red" data-href="/market/paid-subscriptions/">Найти</a>
 									<a class="wide-button color-red" data-href="/market/active-paid-subscriptions/">Управлять</a>
-									<a class="wide-button color-red" data-href="/market/create-paid-subscribe/">Создать</a>
+									<a class="wide-button color-red create-edit-paid-subscribe-caption" data-href="/market/create-paid-subscribe/">Создать</a>
 								</div>
 							</div>
 						</div>
@@ -1406,6 +1412,7 @@
 						</p>
 						<p><label class="radio color-red">Выставить на продажу<input type="radio" name="set-account-on-sale" value="true"><span class="mark"></span></label></p>
 						<p><label class="radio color-red">Снять с продажи<input type="radio" name="set-account-on-sale" value="false"><span class="mark"></span></label></p>
+						<label class="check color-red fee-checkbox">При подаче заявки на продажу аккаунта с вашего кошелька будет списано <span class="median-props" rel="account_on_sale_fee">&hellip; viz</span>.<input type="checkbox" name="account-on-sale-fee"><span class="mark"></span></label>
 						<p class="red sell-account-error"></p>
 						<p class="green sell-account-success"></p>
 						<p>
@@ -1413,7 +1420,10 @@
 							<span class="submit-button-ring"></span>
 							<span class="icon icon-margin hidden icon-color-blue icon-check"></span>
 						</p>
-
+						<div class="addon captions">
+							<h3>Подсказка</h3>
+							<p>Аккаунт будет выставлен на продажу через 7 суток после подачи заявки. Это необходимая мера борьбы с продажей украденных аккаунтов.</p>
+						</div>
 						<p><hr><a data-href="/market/">&larr; Вернуться</a></p>
 					</div>
 				</div>
@@ -1447,6 +1457,7 @@
 						</p>
 						<p><label class="radio color-red">Выставить субаккаунты на продажу<input type="radio" name="set-subaccount-on-sale" value="true"><span class="mark"></span></label></p>
 						<p><label class="radio color-red">Снять субаккаунты с продажи<input type="radio" name="set-subaccount-on-sale" value="false"><span class="mark"></span></label></p>
+						<label class="check color-red fee-checkbox">При подаче заявки на продажу субаккаунтов с вашего кошелька будет списано <span class="median-props" rel="subaccount_on_sale_fee">&hellip; viz</span>.<input type="checkbox" name="subaccount-on-sale-fee"><span class="mark"></span></label>
 						<p class="red sell-subaccount-error"></p>
 						<p class="green sell-subaccount-success"></p>
 						<p>
@@ -1620,7 +1631,7 @@
 				</div>
 				<div class="page page-create-paid-subscribe" data-title="Создать или изменить подписку">
 					<div class="card">
-						<h3>Создать или изменить подписку</h3>
+						<h3><span class="create-edit-paid-subscribe-caption">Создать или изменить</span> подписку</h3>
 						<p>
 							Создатель соглашения (провайдер): <span class="current_user bold"></span>.
 						</p>
@@ -1654,18 +1665,25 @@
 								<input type="text" name="create-paid-subscribe-period" class="simple-rounded" placeholder="0">
 							</label>
 						</p>
-						<p><label class="radio color-red">Обязуюсь выполнять условия соглашения<input type="radio" name="create-paid-subscribe-agreement" value="true"><span class="mark"></span></label></p>
-						<p><label class="radio color-red">Остановить заключение соглашений<input type="radio" name="create-paid-subscribe-agreement" value="false"><span class="mark"></span></label></p>
+						<p><label class="check color-red">Обязуюсь выполнять условия соглашения<input type="checkbox" name="create-paid-subscribe-agreement"><span class="mark"></span></label></p>
+						<!--<p><label class="radio color-red">Остановить заключение соглашений<input type="radio" name="create-paid-subscribe-agreement" value="false"><span class="mark"></span></label></p>-->
+						<label class="check color-red fee-checkbox">При создании подписки с вашего кошелька будет списано <span class="median-props" rel="create_paid_subscription_fee">&hellip; viz</span>.<input type="checkbox" name="create-paid-subscribe-fee"><span class="mark"></span></label>
 						<p class="red create-paid-subscribe-error"></p>
 						<p class="green create-paid-subscribe-success"></p>
 						<p>
 							<input class="create-paid-subscribe-action red-button captions" type="button" value="Подтвердить">
-							<span class="submit-button-ring"></span>
-							<span class="icon icon-margin hidden icon-color-red icon-check"></span>
+							<span class="submit-button-ring" rel="create"></span>
+							<span class="icon icon-margin hidden icon-color-red icon-check" rel="create"></span>
+						</p>
+						<p>
+							<input class="cancel-paid-subscribe-action red-button captions" type="button" value="Остановить подписку">
+							<span class="submit-button-ring" rel="cancel"></span>
+							<span class="icon icon-margin hidden icon-color-red icon-check" rel="cancel"></span>
 						</p>
 						<div class="addon captions">
 							<h3>Подсказка</h3>
-							<p>Один аккаунт может создать только одну подписку. Допускается изменение условий соглашения о подписке и прекращение её действия. Нарушение условий соглашения отразится на вашей репутации. Все соглашения и изменения в них записаны в блокчейн и могут быть проверены.</p>
+							<p>Один аккаунт может создать только одну подписку. Допускается изменение условий соглашения о подписке и прекращение её действия. Нарушение условий соглашения отразится на вашей репутации. Все соглашения и изменения в них записаны в блокчейн и могут быть проверены.<br>
+							После остановки подписки заключённые соглашения продолжат действовать до истечения их срока, а новые соглашения заключаться не будут.</p>
 						</div>
 
 						<p><hr><a data-href="/market/">&larr; Вернуться</a></p>
