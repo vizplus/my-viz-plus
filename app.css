@@ -1869,6 +1869,10 @@ input.simple-inline.red{
 .fill-transfer-amount-action{
 	cursor:pointer;
 }
+.cancel-fund-request-action{
+	font-size:0.8em;
+	cursor:pointer;
+}
 /* tablets */
 @media only screen and (min-width:0) and (max-width:968px){
 	.cards-menu{
