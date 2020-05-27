@@ -72,13 +72,13 @@ if($admin){
 		if('ok'==$_GET['caption'])
 		print '<p class="green">Операция успешно выполнена</p>';
 
-		print 'Список скрытых подписок:';
+		print 'Список скрытых аккаунтов:';
 		$q=$db->sql('SELECT * FROM `accounts_on_sale` WHERE `status`=1 ORDER BY `account` ASC');
 		while($m=$db->row($q)){
 			print '<div style="margin-top:5px;line-height:25px;"><a href="/admin.php?action='.$action.'&show='.$m['account'].'" class="inline-button small no-margin" style="font-size:14px;margin-right:10px !important;">показывать</a> '.$m['account'].($m['length']<8?'<span class="green"> &mdash; длина '.$m['length'].' символов</span>':'').'</div>';
 		}
 
-		print '<hr>Список отображаемых подписок:';
+		print '<hr>Список отображаемых аккаунтов:';
 		$q=$db->sql('SELECT * FROM `accounts_on_sale` WHERE `status`=0 ORDER BY `account` ASC');
 		while($m=$db->row($q)){
 			print '<div style="margin-top:5px;line-height:25px;"><a href="/admin.php?action='.$action.'&hide='.$m['account'].'" class="inline-button small no-margin red" style="font-size:14px;margin-right:10px !important;">скрыть</a> '.$m['account'].($m['length']>8?'<span class="red"> &mdash; длина '.$m['length'].' символов</span>':'').'</div>';
@@ -101,13 +101,13 @@ if($admin){
 		if('ok'==$_GET['caption'])
 		print '<p class="green">Операция успешно выполнена</p>';
 
-		print 'Список скрытых подписок:';
+		print 'Список скрытых субаккаунтов:';
 		$q=$db->sql('SELECT * FROM `subaccounts_on_sale` WHERE `status`=1 ORDER BY `account` ASC');
 		while($m=$db->row($q)){
 			print '<div style="margin-top:5px;line-height:25px;"><a href="/admin.php?action='.$action.'&show='.$m['account'].'" class="inline-button small no-margin" style="font-size:14px;margin-right:10px !important;">показывать</a> '.$m['account'].($m['length']<8?'<span class="green"> &mdash; длина '.$m['length'].' символов</span>':'').'</div>';
 		}
 
-		print '<hr>Список отображаемых подписок:';
+		print '<hr>Список отображаемых субаккаунтов:';
 		$q=$db->sql('SELECT * FROM `subaccounts_on_sale` WHERE `status`=0 ORDER BY `account` ASC');
 		while($m=$db->row($q)){
 			print '<div style="margin-top:5px;line-height:25px;"><a href="/admin.php?action='.$action.'&hide='.$m['account'].'" class="inline-button small no-margin red" style="font-size:14px;margin-right:10px !important;">скрыть</a> '.$m['account'].($m['length']>8?'<span class="red"> &mdash; длина '.$m['length'].' символов</span>':'').'</div>';
