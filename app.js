@@ -1,14 +1,16 @@
 var api_nodes=[
 	'https://node.viz.plus/',
-	'https://vizrpc.lexa.host/',
+	'https://vizrpc.lexai.host/',
 	'https://viz-node.dpos.space/',
-	'https://solox.world/',
-	'https://viz.lexa.host/',
+	'https://node.viz.media/',
+	'https://viz.lexai.host/',
+	'https://node.viz.cx/',
+	'https://api.viz.world/',
 ];
 var default_api_node=api_nodes[0];
 var api_nodes_addon={'list':[]};
 
-var dao_request_ranges=[[1,54],[3759,99999]];
+var dao_request_ranges=[[1,999999]];
 
 var invite_user='invite';
 var invite_active_key='5KcfoRuDfkhrLCxVcE9x51J6KN9aM9fpb78tLrvvFckxVV6FyFW';
@@ -292,22 +294,22 @@ var ltmp_arr={
 	/* History table */
 	history_adaptive_data:'Дата:',
 	history_adaptive_item:'Запись:',
-	history_award:'Награждение <span class="view-account">%receiver%</span> энергией <span class="view-percent">%energy%%</span>',
+	history_award:'Награждение <a class="view-account" href="https://info.viz.plus/accounts/%receiver%/" target="_blank">%receiver%</a> энергией <span class="view-percent">%energy%%</span>',
 	history_award_memo:' с заметкой ',
-	history_receive_award:'Получена награда <span class="view-tokens">%shares%</span> от <span class="view-account">%initiator%</span>',
+	history_receive_award:'Получена награда <span class="view-tokens">%shares%</span> от <a class="view-account" href="https://info.viz.plus/accounts/%initiator%/" target="_blank">%initiator%</a>',
 	history_create_invite:'Выписан чек на <span class="view-tokens">%tokens%</span> с кодом проверки <span class="view-key">%key%</span>',
 	history_claim_invite_balance:'Погашен чек с кодом <span class="view-key">%key%</span>',
 	history_use_invite_balance:'Погашен чек с кодом <span class="view-key">%key%</span>',
-	history_transfer_from:'<span class="view-tokens">%tokens%</span> отправлено <span class="view-account">%to%</span>',
-	history_transfer_to:'<span class="view-tokens">%tokens%</span> получено от <span class="view-account">%from%</span>',
+	history_transfer_from:'<span class="view-tokens">%tokens%</span> отправлено <a class="view-account" href="https://info.viz.plus/accounts/%to%/" target="_blank">%to%</a>',
+	history_transfer_to:'<span class="view-tokens">%tokens%</span> получено от <a class="view-account" href="https://info.viz.plus/accounts/%from%/" target="_blank">%from%</a>',
 	history_transfer_memo:' с заметкой ',
-	history_transfer_to_vesting_from:'<span class="view-tokens">%tokens%</span> отправлено в социальный капитал <span class="view-account">%to%</span>',
-	history_transfer_to_vesting_to:'<span class="view-tokens">%tokens%</span> получено в социальный капитал от <span class="view-account">%from%</span>',
+	history_transfer_to_vesting_from:'<span class="view-tokens">%tokens%</span> отправлено в социальный капитал <a class="view-account" href="https://info.viz.plus/accounts/%to%/" target="_blank">%to%</a>',
+	history_transfer_to_vesting_to:'<span class="view-tokens">%tokens%</span> получено в социальный капитал от <a class="view-account" href="https://info.viz.plus/accounts/%from%/" target="_blank">%from%</a>',
 	history_withdraw_vesting_stop:'Остановка понижения социального капитала',
 	history_withdraw_vesting:'Активация понижения социального капитала суммой <span class="view-tokens">%shares%</span>',
 	history_fill_vesting_withdraw:'Получено <span class="view-tokens">%tokens%</span> от понижения социального капитала',
-	history_fill_vesting_withdraw_from:'Аккаунту <span class="view-account">%to%</span> отправлено <span class="view-tokens">%tokens%</span> от понижения социального капитала',
-	history_fill_vesting_withdraw_to:'Получено <span class="view-tokens">%tokens%</span> от понижения социального капитала аккаунтом <span class="view-account">%from%<span>',
+	history_fill_vesting_withdraw_from:'Аккаунту <a class="view-account" href="https://info.viz.plus/accounts/%to%/" target="_blank">%to%</a> отправлено <span class="view-tokens">%tokens%</span> от понижения социального капитала',
+	history_fill_vesting_withdraw_to:'Получено <span class="view-tokens">%tokens%</span> от понижения социального капитала аккаунтом <a class="view-account" href="https://info.viz.plus/accounts/%from%/" target="_blank">%from%<a>',
 
 	login_wif_invalid:'Приватный ключ невалидный',
 	login_account_not_found:'Аккаунт с таким логином не найден',
@@ -798,6 +800,26 @@ var users={};
 var current_user='';
 var current_user_active_paid_subscribes=[];
 var current_view='';
+
+var calc_max_delegation_timer=0;
+function calc_max_delegation(){
+	let max_delegation=$('.page-delegate-shares .shares-balance .vesting-shares').data('available-vesting-shares');
+	$('.page-delegate-shares .delegate-shares-max-tokens-amount').html(number_thousands(show_balance_in_tokens(max_delegation,true)));
+	$('.page-delegate-shares .delegate-shares-max-tokens-amount').attr('data-vesting-shares',max_delegation);
+	let delegatee=$('.page-delegate-shares input[name=delegate-shares-account]').val();
+	viz.api.getVestingDelegations(current_user,delegatee,1,0,function(err,response){
+		if(!err){
+			console.log(response);
+			if(typeof response[0] !== 'undefined'){
+				if(delegatee==response[0].delegatee){
+					max_delegation+=parseFloat(response[0].vesting_shares);
+					$('.page-delegate-shares .delegate-shares-max-tokens-amount').html(number_thousands(show_balance_in_tokens(max_delegation,true)));
+					$('.page-delegate-shares .delegate-shares-max-tokens-amount').attr('data-vesting-shares',max_delegation);
+				}
+			}
+		}
+	});
+}
 function update_delegations_tables(){
 	viz.api.getVestingDelegations(current_user,0,1000,0,function(err,response){
 		if(!err){
@@ -2672,6 +2694,12 @@ function view_assets(path,params,title){
 		$('.view-'+path[1]+' .page').css('display','none');
 		if(typeof path[2] != 'undefined'){
 			if(0<$('.view-'+path[1]+' .page-'+path[2]).length){
+				if('exchange'==path[2]){
+					//check exchange canary state
+					if(typeof window['load_exchange_data'] === 'function'){
+						setTimeout(function(){load_exchange_data();},1);
+					}
+				}
 				$('.view-'+path[1]+' .page-'+path[2]).css('display','block');
 				if('unstake-shares'==path[2]){
 					viz.api.getChainProperties(function(err,response){
@@ -2827,6 +2855,17 @@ function view_assets(path,params,title){
 					$('.page-delegate-shares input[name=delegate-shares-account]').val('');
 					$('.page-delegate-shares input[name=delegate-shares-tokens-amount]').val('');
 
+					$('.page-delegate-shares input[name=delegate-shares-account]').unbind('input');
+					$('.page-delegate-shares input[name=delegate-shares-account]').bind('input',function(){
+						clearTimeout(calc_max_delegation_timer);
+						calc_max_delegation_timer=setTimeout(function(){calc_max_delegation();},1000);
+					});
+					$('.page-delegate-shares input[name=delegate-shares-account]').unbind('keypress');
+					$('.page-delegate-shares input[name=delegate-shares-account]').bind('keypress',function(){
+						clearTimeout(calc_max_delegation_timer);
+						calc_max_delegation_timer=setTimeout(function(){calc_max_delegation();},1000);
+					});
+
 					let balance_el=$('.view-'+path[1]+' .page-'+path[2]+' .shares-balance');
 					balance_el.find('.vesting-shares').html('&hellip;');
 					balance_el.find('.delegated-vesting-shares').html('&hellip;');
@@ -2842,6 +2881,7 @@ function view_assets(path,params,title){
 								update_shares_balance(balance_el,response[0]);
 								$('.page-delegate-shares .input-caption .effective-vesting-shares').attr('data-vesting-shares',parseFloat(balance_el.find('.vesting-shares').attr('data-available-vesting-shares')));
 								$('.page-delegate-shares .input-caption .effective-vesting-shares').html(number_thousands(show_balance_in_tokens(parseFloat(balance_el.find('.vesting-shares').attr('data-available-vesting-shares')),true)));
+								calc_max_delegation();
 							}
 						}
 					});
@@ -2851,6 +2891,13 @@ function view_assets(path,params,title){
 			}
 		}
 		if(0<$('.view-'+path[1]+' .page-index').length){
+			$('.view-'+path[1]+' .page-index a.exchange-button').css('display','none');
+			if(standalone){
+				$('.view-'+path[1]+' .page-index .tokens-caption').addClass('standalone');
+			}
+			else{
+				$('.view-'+path[1]+' .page-index a.exchange-button').css('display','block');
+			}
 			$('.view-'+path[1]+' .page-index').css('display','block');
 			path[2]='index';
 			viz.api.getAccounts([current_user],function(err,response){
@@ -2970,8 +3017,11 @@ function update_witnesses_list(){
 							}
 							item+='<p>'+ltmp_arr.witness_penalty_caption+'<strong>'+(parseInt(item_arr.penalty_percent)/100)+'%</strong></p>';
 							let props_item=item_arr.props;
-							for(j in ltmp_arr.witness_props_order){
-								item+='<p>'+witness_props_captions[j]+': <strong data-prop="'+j+'" data-value="'+props_item[j]+'">'+(-1!==witness_props_percent.indexOf(j)?(parseFloat(props_item[j])/100)+'%':props_item[j])+'</strong></p>';
+							for(let j_num in ltmp_arr.witness_props_order){
+								let j=ltmp_arr.witness_props_order[j_num];
+								if(typeof witness_props_captions[j] != 'undefined'){
+									item+='<p>'+witness_props_captions[j]+': <strong data-prop="'+j+'" data-value="'+props_item[j]+'">'+(-1!==witness_props_percent.indexOf(j)?(parseFloat(props_item[j])/100)+'%':props_item[j])+'</strong></p>';
+								}
 							}
 							/*
 							//old order by props object sort
@@ -3127,7 +3177,7 @@ function update_fund_request(id,votes,votes_update){
 							voters_percent_arr[vote.voter]=parseInt(vote.vote_percent);
 							let vote_percent=(parseInt(vote.vote_percent)/100);
 							vote_percent=fast_str_replace('-','&minus;',''+vote_percent)+'%';
-							data+=' <span class="view-percent">'+vote_percent+'</span>'+ltmp_arr.fund_request_vote_list_from+'<span class="view-account'+(current_user==vote.voter?' bold':'')+'">'+vote.voter+'</span>';
+							data+=' <span class="view-percent">'+vote_percent+'</span>'+ltmp_arr.fund_request_vote_list_from+'<a class="view-account'+(current_user==vote.voter?' bold':'')+'" href="https://info.viz.plus/accounts/'+vote.voter+'/" target="_blank">'+vote.voter+'</a>';
 							data+='<span class="shares"></span>';
 							data+='</div>';
 						}
@@ -3187,9 +3237,9 @@ function update_fund_request(id,votes,votes_update){
 						if(''!=url){
 							data+='<p>'+ltmp_arr.fund_request_url_caption+'<span class="request-url"><a href="'+escape_html(url)+'" target="_blank">'+escape_html(url)+'</a></span></p>';
 						}
-						data+='<p>'+ltmp_arr.fund_request_creator_caption+'<span class="request-creator">'+response.creator+'</span></p>';
+						data+='<p>'+ltmp_arr.fund_request_creator_caption+'<a class="view-account request-creator" href="https://info.viz.plus/accounts/'+response.creator+'/" target="_blank">'+response.creator+'</a></p>';
 						if(response.worker!=response.creator){
-							data+='<p>'+ltmp_arr.fund_request_worker_caption+'<span class="request-worker">'+response.worker+'</span></p>';
+							data+='<p>'+ltmp_arr.fund_request_worker_caption+'<a class="view-account request-worker" href="https://info.viz.plus/accounts/'+response.worker+'/" target="_blank">'+response.worker+'</a></p>';
 						}
 						data+='<p>'+ltmp_arr.fund_request_min_amount_caption+'<span class="request-required-amount-min">'+number_thousands(show_balance_in_tokens(response.required_amount_min,true))+'</span></p>';
 						let required_amount_max=response.required_amount_max;
@@ -3255,7 +3305,7 @@ function update_fund_request(id,votes,votes_update){
 									voters_percent_arr[vote.voter]=parseInt(vote.vote_percent);
 									let vote_percent=(parseInt(vote.vote_percent)/100);
 									vote_percent=fast_str_replace('-','&minus;',''+vote_percent)+'%';
-									data+=' <span class="view-percent">'+vote_percent+'</span>'+ltmp_arr.fund_request_vote_list_from+'<span class="view-account'+(current_user==vote.voter?' bold':'')+'">'+vote.voter+'</span>';
+									data+=' <span class="view-percent">'+vote_percent+'</span>'+ltmp_arr.fund_request_vote_list_from+'<a class="view-account'+(current_user==vote.voter?' bold':'')+'" href="https://info.viz.plus/accounts/'+vote.voter+'/" target="_blank">'+vote.voter+'</a>';
 									data+='<span class="shares"></span>';
 									data+='</div>';
 								}
@@ -3541,12 +3591,19 @@ function change_state(location,state,save_state){
 	document.title=title;
 	//exec function from path
 	if(typeof window['view_'+path[1]] === 'function'){
+		//stop exchange data updates
+		if(typeof window['stop_load_exchange_data'] === 'function'){
+			setTimeout(window['stop_load_exchange_data'],1);
+		}
 		current_view=path[1];
 		setTimeout(window['view_'+path[1]],1,path,params,title);
 		setTimeout(function(){
+			$('.absolute-view.menu-list').css('display','none');
+			/*
 			if('none'==$('.menu-list').css('float')){
 				$('.menu-list').css('display','none');
 			}
+			*/
 			$('.users-drop-down').css('display','none');
 		},2);
 	}
@@ -4425,6 +4482,7 @@ function undelegate_shares(account,el){
 						update_shares_balance(balance_el,response[0]);
 						$('.page-delegate-shares .input-caption .effective-vesting-shares').attr('data-vesting-shares',parseFloat(balance_el.find('.vesting-shares').attr('data-available-vesting-shares')));
 						$('.page-delegate-shares .input-caption .effective-vesting-shares').html(number_thousands(show_balance_in_tokens(parseFloat(balance_el.find('.vesting-shares').attr('data-available-vesting-shares')),true)));
+						calc_max_delegation();
 					}
 				}
 			});
@@ -4475,6 +4533,7 @@ function delegate_shares(account,amount,el){
 						update_shares_balance(balance_el,response[0]);
 						$('.page-delegate-shares .input-caption .effective-vesting-shares').attr('data-vesting-shares',parseFloat(balance_el.find('.vesting-shares').attr('data-available-vesting-shares')));
 						$('.page-delegate-shares .input-caption .effective-vesting-shares').html(number_thousands(show_balance_in_tokens(parseFloat(balance_el.find('.vesting-shares').attr('data-available-vesting-shares')),true)));
+						calc_max_delegation();
 					}
 				}
 			});
@@ -4550,6 +4609,7 @@ function stake_shares(tokens_amount,el){
 
 	page.find('.stake-shares-error').html('');
 	page.find('.stake-shares-success').html('');
+	tokens_amount=fast_str_replace(',','.',tokens_amount);
 	let fixed_tokens_amount=''+parseFloat(tokens_amount).toFixed(3)+' VIZ';
 	if(''==tokens_amount){
 		fixed_tokens_amount='0.000 VIZ';
@@ -5103,7 +5163,6 @@ function save_profile(el){
 					if(typeof json_metadata.profile.services === 'undefined'){
 						json_metadata.profile.services={};
 					}
-					json_metadata.profile.services={};
 
 					if(''==el.find('input[name=manage-profile-facebook]').val().trim()){
 						if(typeof json_metadata.profile.services.facebook !== 'undefined'){
@@ -5512,15 +5571,22 @@ function app_mouse(e){
 	if(typeof $(target).attr('data-href') != 'undefined'){
 		var href=$(target).attr('data-href');
 		if($(target).hasClass('menu-el')){
+			$('.absolute-view.menu-list').css('display','none');
+			/*
 			if('none'==$('.menu-list').css('float')){
 				$('.menu-list').css('display','none');
 			}
+			*/
 		}
 		change_state(href,{},true);
 		e.preventDefault();
 	}
 	if($(target).hasClass('go-top')){
 		$('body,html').animate({scrollTop:0},1000);
+	}
+	if($(target).hasClass('fill-stake-shares-amount-action')){
+		let amount=parseFloat($(target).attr('data-raw'));
+		$('.page-stake-shares input[name=stake-shares-tokens-amount]').val(amount);
 	}
 	if($(target).hasClass('fill-transfer-amount-action')){
 		let amount=parseFloat($(target).attr('data-raw'));
@@ -5647,6 +5713,9 @@ function app_mouse(e){
 		update_fund_requests(3);
 		update_fund_requests(4);
 		update_fund_requests(5);
+	}
+	if($(target).hasClass('delegate-shares-max-tokens-amount-action') || $(target).hasClass('delegate-shares-max-tokens-amount')){
+		$('.page-delegate-shares input[name=delegate-shares-tokens-amount]').val($('.page-delegate-shares .delegate-shares-max-tokens-amount').attr('data-vesting-shares'));
 	}
 	if($(target).hasClass('witness-props-action')){
 		let props_el=$(target).parent().find('.witness-props');
@@ -5846,6 +5915,26 @@ function app_mouse(e){
 				$('.page-deposit .icon-check').css('display','inline-block');
 			},
 		});
+	}
+	if($(target).hasClass('exchange-buy-action')){
+		if(typeof window['exchange_buy'] === 'function'){
+			exchange_buy(target);
+		}
+	}
+	if($(target).hasClass('exchange-copy-eth-action')){
+		if(typeof window['exchange_copy_eth'] === 'function'){
+			exchange_copy_eth(target);
+		}
+	}
+	if($(target).hasClass('exchange-qr-eth-action')){
+		if(typeof window['exchange_qr_eth'] === 'function'){
+			exchange_qr_eth(target);
+		}
+	}
+	if($(target).hasClass('exchange-sell-action')){
+		if(typeof window['exchange_sell'] === 'function'){
+			exchange_sell(target);
+		}
 	}
 	if($(target).hasClass('transfer-action')){
 		let account=$('.page-transfer input[name=transfer-account]').val().toLowerCase().trim();
@@ -6098,12 +6187,12 @@ function app_mouse(e){
 	}
 	if($(target).hasClass('menu-button-action')){
 		if('none'==$('.menu-list').css('float')){
-			if('none'==$('.menu-list').css('display')){
-				$('.menu-list').css('display','block');
+			if('none'==$('.absolute-view.menu-list').css('display')){
+				$('.absolute-view.menu-list').css('display','block');
 				$('.users-drop-down').css('display','none');
 			}
 			else{
-				$('.menu-list').css('display','none');
+				$('.absolute-view.menu-list').css('display','none');
 			}
 		}
 	}
@@ -6141,7 +6230,7 @@ function app_mouse(e){
 			$('.users-drop-down').css('margin-left',''+(-5+15+(-1*($('.users-drop-down').width())))+'px');
 			$('.users-drop-down').css('display','block');
 			if('none'==$('.menu-list').css('float')){
-				$('.menu-list').css('display','none');
+				$('.absolute-view.menu-list').css('display','none');
 			}
 		}
 		else{
@@ -6263,12 +6352,15 @@ $(document).ready(function(){
 	}
 
 	$(window).resize(function(){
+		$('.absolute-view.menu-list').css('display','none');
+		/*
 		if('none'==$('.menu-list').css('float')){
 			$('.menu-list').css('display','none');
 		}
 		else{
 			$('.menu-list').css('display','block');
 		}
+		*/
 	});
 
 	if(null!=localStorage.getItem('users')){
@@ -6529,6 +6621,13 @@ $(document).ready(function(){
 	clearTimeout(update_dgp_timer);
 	update_dgp_timer=setTimeout('update_dgp()',100);
 
+	/*
+	let isIOS = (/iPad|iPhone|iPod/.test(navigator.platform) ||
+	(navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) &&
+	!window.MSStream;
+	if(!isIOS){
+	}
+	*/
 	document.addEventListener('click', app_mouse, false);
 	document.addEventListener('tap', app_mouse, false);
 	document.addEventListener('keyup', app_keyboard, false);

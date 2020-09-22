@@ -620,6 +620,7 @@
 								<div class="tokens-caption captions"><span class="value">&hellip;</span><span class="symbol"> viz</span></div>
 								<div class="wide-buttons captions">
 									<a class="wide-button color-green" data-href="/assets/transfer/">Перевести</a>
+									<a class="wide-button color-green exchange-button" data-href="/assets/exchange/">Обменять</a>
 									<a class="wide-button color-green" data-href="/assets/checks/">Чеки</a>
 								</div>
 							</div>
@@ -637,7 +638,7 @@
 					<div class="card">
 						<h3>Увеличить социальный капитал</h3>
 						<div class="account-balance captions">
-							<div>Баланс: <span rel="token">&hellip;</span> viz</div>
+							<div>Баланс: <span rel="token" class="fill-stake-shares-amount-action">&hellip;</span> viz</div>
 							<div>Капитал: <span rel="shares">&hellip;</span> viz</div>
 						</div>
 						<p>
@@ -801,7 +802,7 @@
 							<label class="input-descr">
 								<span class="input-caption">Делегировать:</span>
 								<input type="text" name="delegate-shares-tokens-amount" class="simple-rounded" placeholder="0.00 viz">
-								<span class="input-caption text-small grey captions delegate-shares-max-tokens-amount-action">(максимум <span class="effective-vesting-shares">&hellip;</span>)</span>
+								<span class="input-caption text-small grey captions delegate-shares-max-tokens-amount-action">(максимум <span class="delegate-shares-max-tokens-amount">&hellip;</span>)</span>
 							</label>
 						</p>
 						<p class="red delegate-shares-error"></p>
@@ -852,11 +853,258 @@
 						</div>
 					</div>
 				</div>
+				<div class="page page-exchange" data-title="Сервис обмена">
+					<div class="card loading-status">
+						<h3>Обмен</h3>
+						<p class="wait-loading" style="display:block;"><span class="submit-button-ring" rel="exchange-buy" style="display:inline-block;"></span> Пожалуйста, подождите&hellip;</p>
+						<p class="loading-error" style="display:none;">Сервис временно недоступен, попробуйте позже.</p>
+					</div>
+					<div class="card successful-loading" style="display:none;">
+						<div class="addon captions"><h3>Внимание!</h3>
+							<p>Сервис обмена действует в бета-режиме, поэтому в его работе возможны сбои и ошибки.</p>
+							<p>Если что-то пошло не так, пожалуйста, проявите терпение и сообщите нам о возникшей проблеме по адресу <a href="mailto:vizplus@protonmail.com">vizplus@protonmail.com</a> или в Телеграм-группу <a href="https://t.me/vizplus" target="_blank">@vizplus</a>. Спасибо за понимание!</p>
+						</div>
+						<h3>Обмен</h3>
+						<div class="account-balance captions">
+							<div>Баланс: <span rel="token" class="fill-exchange-amount-action">&hellip;</span> viz</div>
+						</div>
+						<div class="table-view exchange-data captions">
+							<div class="table-header">
+								<div class="columns-view adaptive-hide-flex">
+									<div class="column-view column-3">Резерв</div>
+									<div class="column-view column-3">viz</div>
+									<div class="column-view column-flex">usdt</div>
+								</div>
+								<div class="columns-view adaptive-show-flex">
+									<!--<div class="column-view column-flex">Данные о резервах</div>-->
+									<div class="column-view column-3">Резерв</div>
+									<div class="column-view column-3">viz</div>
+									<div class="column-view column-flex">usdt</div>
+								</div>
+							</div>
+							<div class="table-data">
+								<div class="columns-view adaptive-hide-flex summary">
+									<div class="column-view column-3 caption-data">— расчётный</div>
+									<div class="column-view column-3 viz-data">&hellip;</div>
+									<div class="column-view column-flex usdt-data">&hellip;</div>
+								</div>
+								<div class="columns-view adaptive-show-flex summary">
+									<div class="column-view column-flex caption-data" style="width:10% !important;">Расч.</div>
+									<div class="column-view column-3 viz-data" style="width:45% !important;white-space:nowrap;">&hellip;</div>
+									<div class="column-view column-3 usdt-data" style="width:35% !important;white-space:nowrap;">&hellip;</div>
+								</div>
+								<!--
+								<div class="columns-view adaptive-show-flex summary">
+									<div class="column-view column-flex">Расч.:&nbsp;<span class="viz-data" style="white-space:nowrap;">&hellip;</span>&nbsp;viz,&nbsp;<span class="usdt-data" style="white-space:nowrap;">&hellip;</span>&nbsp;usdt</div>
+								</div>
+								-->
+								<div class="columns-view adaptive-hide-flex hot">
+									<div class="column-view column-3 caption-data">— горячий</div>
+									<div class="column-view column-3 viz-data">&hellip;</div>
+									<div class="column-view column-flex usdt-data">&hellip;</div>
+								</div>
+								<div class="columns-view adaptive-show-flex hot">
+									<div class="column-view column-flex caption-data" style="width:10% !important;">Гор.</div>
+									<div class="column-view column-3 viz-data" style="width:45% !important;white-space:nowrap;">&hellip;</div>
+									<div class="column-view column-3 usdt-data" style="width:35% !important;white-space:nowrap;">&hellip;</div>
+								</div>
+								<!--
+								<div class="columns-view adaptive-show-flex hot">
+									<div class="column-view column-flex">Гор.:&nbsp;<span class="viz-data">&hellip;</span>&nbsp;viz,&nbsp;<span class="usdt-data">&hellip;</span>&nbsp;usdt</div>
+								</div>
+								-->
+								<div class="columns-view adaptive-hide-flex cold">
+									<div class="column-view column-3 caption-data">— холодный</div>
+									<div class="column-view column-3 viz-data">&hellip;</div>
+									<div class="column-view column-flex usdt-data">&hellip;</div>
+								</div>
+								<div class="columns-view adaptive-show-flex cold">
+									<div class="column-view column-flex caption-data" style="width:10% !important;">Хол.</div>
+									<div class="column-view column-3 viz-data" style="width:45% !important;white-space:nowrap;">&hellip;</div>
+									<div class="column-view column-3 usdt-data" style="width:35% !important;white-space:nowrap;">&hellip;</div>
+								</div>
+								<!--
+								<div class="columns-view adaptive-show-flex cold">
+									<div class="column-view column-flex">Хол.:&nbsp;<span class="viz-data">&hellip;</span>&nbsp;viz,&nbsp;<span class="usdt-data">&hellip;</span>&nbsp;usdt</div>
+								</div>
+								-->
+								<div class="columns-view adaptive-hide-flex provision">
+									<div class="column-view column-3 caption-data">Обеспечение</div>
+									<div class="column-view column-3 viz-data">&hellip;</div>
+									<div class="column-view column-flex usdt-data">&hellip;</div>
+								</div>
+								<div class="columns-view adaptive-show-flex provision">
+									<div class="column-view column-flex caption-data" style="width:10% !important;">%</div>
+									<div class="column-view column-3 viz-data" style="width:45% !important;white-space:nowrap;">&hellip;</div>
+									<div class="column-view column-3 usdt-data" style="width:35% !important;white-space:nowrap;">&hellip;</div>
+								</div>
+								<!--
+								<div class="columns-view adaptive-show-flex provision">
+									<div class="column-view column-flex">Обесп.:&nbsp;<span class="viz-data">&hellip;</span>&nbsp;viz,&nbsp;<span class="usdt-data">&hellip;</span>&nbsp;usdt</div>
+								</div>
+								-->
+							</div>
+
+							<div class="table-header">
+								<div class="columns-view">
+									<div class="column-view column-flex minify"></div>
+								</div>
+							</div>
+							<div class="table-data">
+								<div class="columns-view adaptive-hide-flex rate">
+									<div class="column-view column-3 caption-data">Учётный курс:</div>
+									<div class="column-view column-flex ratio-data">&hellip;</div>
+								</div>
+								<div class="columns-view adaptive-show-flex rate">
+									<div class="column-view column-flex">Учётный курс:&nbsp;<span class="ratio-data">&hellip;</span></div>
+								</div>
+							</div>
+							<div class="table-footer"><em>Не является обязательством. Реальный курс обмена определяется в момент сделки и зависит от её объёма.</em></div>
+						</div>
+
+						<hr><h4 class="center">Покупка viz</h4>
+						<div class="table-view exchange-buy-data captions">
+							<div class="table-header">
+								<div class="columns-view">
+									<div class="column-view column-flex minify"></div>
+								</div>
+							</div>
+							<div class="table-data">
+								<div class="columns-view min-amount">
+									<div class="column-view column-3 caption-data">Мин. покупка</div>
+									<div class="column-view column-flex viz-data">&hellip;</div>
+								</div>
+								<div class="columns-view max-amount">
+									<div class="column-view column-3 caption-data">Макс. покупка</div>
+									<div class="column-view column-flex viz-data">&hellip;</div>
+								</div>
+								<div class="columns-view input-amount">
+									<div class="column-view column-3 caption-data" style="padding:23px 15px;">
+										<span class="adaptive-hide bold">Вы хотите купить</span>
+										<span class="adaptive-show bold">Купить</span>
+									</div>
+									<div class="column-view column-flex viz-data" style="display:block !important;">
+										<input type="text" name="buy-tokens-amount" class="simple-rounded" placeholder="0.00 viz" style="margin:0;" type="number" step="0.01">
+										<div class="red exchange-buy-input-error"></div>
+									</div>
+								</div>
+								<div class="columns-view output-amount">
+									<div class="column-view column-3 caption-data">на сумму *</div>
+									<div class="column-view column-flex usdt-data">&hellip;</div>
+								</div>
+								<div class="columns-view rate">
+									<div class="column-view column-3 caption-data">
+										<span class="adaptive-hide">по средней цене</span>
+										<span class="adaptive-show">по цене</span>
+									</div>
+									<div class="column-view column-flex ratio-data">&hellip;</div>
+								</div>
+							</div>
+							<div class="table-footer left"><em>* комиссия включена</em></div>
+						</div>
+						<p>Нажмите кнопку "Начать обмен" и получите адрес для перевода токенов USDT(ERC20) в блокчейне Ethereum. В этот момент с вашего аккаунта будет снят <span class="eth_wallet_cost">&hellip; viz</span>.</p>
+						<p>Переведите любую сумму USDT в пределах лимитов на полученный адрес (учитывайте изменение курса при изменении суммы и комиссию).</p>
+						<p>После поступления USDT обменник отправит соответствующее количество viz на ваш аккаунт, <b>исходя из курса на момент поступления USDT</b>.</p>
+						<p>Адрес для отправки USDT действует в течение 1 часа после начала обмена. Каждый адрес уникален и  предназначен только для одного обмена!</p>
+						<p class="bold">Не отправляйте USDT на один и тот же адрес повторно!</p>
+						<p class="red exchange-buy-error"></p>
+						<p class="green exchange-buy-success"></p>
+						<p>
+							<input class="exchange-buy-action green-button captions" type="button" value="Начать обмен">
+							<span class="submit-button-ring" rel="exchange-buy"></span>
+							<span class="icon icon-margin hidden icon-color-green icon-check" rel="exchange-buy"></span>
+						</p>
+						<div class="exchange-buy-view" style="display:none;">
+							<p>
+								Адрес для перевода USDT:
+								<input type="text" name="exchange-income-eth-address" class="simple-rounded wide" placeholder="ETH адрес" disabled>
+							</p>
+							<p>
+								<input class="exchange-copy-eth-action green-button captions" type="button" value="Копировать"><span class="icon icon-margin hidden icon-color-green icon-check" rel="exchange-copy-eth"></span></p>
+							<p>
+								<input class="exchange-qr-eth-action green-button captions" type="button" value="QR-код"><span class="icon icon-margin hidden icon-color-green icon-check" rel="exchange-qr-eth"></span>
+							</p>
+							<div class="qr-view"></div>
+						</div>
+						<br>
+						<p>Скорость сделки практически полностью зависит от скорости поступления ваших USDT на наш адрес. Выбирайте размер комиссии в блокчейне Ethereum, исходя из этого.</p>
+
+
+						<hr><h4 class="center">Продажа viz</h4>
+						<div class="table-view exchange-sell-data captions">
+							<div class="table-header">
+								<div class="columns-view">
+									<div class="column-view column-flex minify"></div>
+								</div>
+							</div>
+							<div class="table-data">
+								<div class="columns-view min-amount">
+									<div class="column-view column-3 caption-data">Мин. продажа</div>
+									<div class="column-view column-flex viz-data">&hellip;</div>
+								</div>
+								<div class="columns-view max-amount">
+									<div class="column-view column-3 caption-data">Макс. продажа</div>
+									<div class="column-view column-flex viz-data">&hellip;</div>
+								</div>
+								<div class="columns-view input-amount">
+									<div class="column-view column-3 caption-data" style="padding:23px 15px;">
+										<span class="adaptive-hide bold">Вы хотите продать</span>
+										<span class="adaptive-show bold">Продать</span>
+									</div>
+									<div class="column-view column-flex viz-data" style="display:block !important;">
+										<input type="text" name="sell-tokens-amount" class="simple-rounded" placeholder="0.00 viz" style="margin:0;">
+										<div class="red exchange-sell-input-error"></div>
+									</div>
+								</div>
+								<div class="columns-view output-amount">
+									<div class="column-view column-3 caption-data">на сумму *</div>
+									<div class="column-view column-flex usdt-data">&hellip;</div>
+								</div>
+								<div class="columns-view rate">
+									<div class="column-view column-3 caption-data">
+										<span class="adaptive-hide">по средней цене</span>
+										<span class="adaptive-show">по цене</span>
+									</div>
+									<div class="column-view column-flex ratio-data">&hellip;</div>
+								</div>
+								<!--
+								<div class="columns-view address">
+									<div class="column-view column-3 caption-data">Ваш адрес для получения USDT</div>
+									<div class="column-view column-flex address-data">
+										<input type="text" name="exchange-outcome-eth-address" class="simple-rounded wide" placeholder="ETH адрес" style="margin:0;">
+									</div>
+								</div>
+								-->
+							</div>
+							<div class="table-footer left"><em>* комиссия включена</em></div>
+						</div>
+						<div class="exchange-sell-view">
+							<p>
+								Ваш адрес для получения USDT:
+								<input type="text" name="exchange-outcome-eth-address" class="simple-rounded wide" placeholder="ETH адрес">
+							</p>
+						</div>
+						<p class="red exchange-sell-error"></p>
+						<p class="green exchange-sell-success"></p>
+						<p>
+							<input class="exchange-sell-action green-button captions" type="button" value="Обменять" disabled="disabled">
+							<span class="submit-button-ring" rel="exchange-sell"></span>
+							<span class="icon icon-margin hidden icon-color-green icon-check" rel="exchange-sell"></span>
+						</p>
+						<br><!--<div class="addon captions"><h3>Подсказка</h3></div>-->
+						<p>Введите количество viz на продажу в пределах лимитов и <b>принадлежащий вам</b> адрес в блокчейне Ethereum для получения USDT(ERC20). Нажмите кнопку "Обменять".</p>
+						<p>Продажа viz происходит мгновенно. Время поступления токенов USDT(ERC20) на ваш адрес зависит от работы блокчейна Ethereum и обычно составляет несколько минут.</p>
+
+						<script src="/qrcode.min.js" type="text/javascript"></script>
+						<script src="/exchange.js" type="text/javascript"></script>
+						<p><hr><a data-href="/assets/">&larr; Вернуться</a></p>
+					</div>
+				</div>
 				<div class="page page-transfer" data-title="Перевести">
 					<div class="card">
 						<h3>Перевести</h3>
 						<div class="account-balance captions">
-							<div>Баланс: <span rel="token" class="fill-transfer-amount-action cursor">&hellip;</span> viz</div>
+							<div>Баланс: <span rel="token" class="fill-transfer-amount-action">&hellip;</span> viz</div>
 						</div>
 						<p>
 							<label class="input-descr">
@@ -948,9 +1196,7 @@
 							<span class="submit-button-ring" rel="claim"></span>
 							<span class="icon icon-margin hidden icon-color-green icon-check" rel="claim"></span>
 						</p>
-
 						<div class="addon captions"><h3>Подсказка</h3><p>После создания чека вы получите код для его погашения. Обязательно сохраните его, так как при его потере восстановление невозможно.</p></div>
-
 						<p><hr><a data-href="/assets/">&larr; Вернуться</a></p>
 
 						<div class="table-view captions">
@@ -1695,5 +1941,13 @@
 	</div>
 </div>
 <div class="go-top adaptive-show-block">&uarr;</div>
+<div class="absolute-view menu-list captions">
+	<div class="menu-bg">
+		<a class="menu-el color-blue" data-href="/accounts/">Аккаунты</a>
+		<a class="menu-el color-green" data-href="/assets/">Активы</a>
+		<a class="menu-el color-orange" data-href="/dao/">ДАО</a>
+		<a class="menu-el color-red" data-href="/market/">Магазин</a>
+	</div>
+</div>
 </body>
 </html>

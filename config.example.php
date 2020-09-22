@@ -6,3 +6,4 @@ $config['db_login']='login';
 $config['db_password']='password';
 $config['db_base']='database';
 $config['jsonrpc_node']='https://vizrpc.lexa.host/';
+$config['infura_key']='';
