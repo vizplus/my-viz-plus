@@ -803,7 +803,9 @@ var current_view='';
 
 var calc_max_delegation_timer=0;
 function calc_max_delegation(){
-	let max_delegation=$('.page-delegate-shares .shares-balance .vesting-shares').data('available-vesting-shares');
+	let max_delegation=parseFloat($('.page-delegate-shares .shares-balance .vesting-shares').data('available-vesting-shares')).toFixed(2);
+	max_delegation-=parseFloat($('.page-delegate-shares .shares-balance .vesting-shares').data('withdraw-amount')).toFixed(2);
+	max_delegation=Math.max(0,max_delegation);
 	$('.page-delegate-shares .delegate-shares-max-tokens-amount').html(number_thousands(show_balance_in_tokens(max_delegation,true)));
 	$('.page-delegate-shares .delegate-shares-max-tokens-amount').attr('data-vesting-shares',max_delegation);
 	let delegatee=$('.page-delegate-shares input[name=delegate-shares-account]').val();
@@ -812,7 +814,8 @@ function calc_max_delegation(){
 			console.log(response);
 			if(typeof response[0] !== 'undefined'){
 				if(delegatee==response[0].delegatee){
-					max_delegation+=parseFloat(response[0].vesting_shares);
+					max_delegation-=parseFloat(response[0].vesting_shares).toFixed(2);
+					max_delegation=Math.max(0,max_delegation);
 					$('.page-delegate-shares .delegate-shares-max-tokens-amount').html(number_thousands(show_balance_in_tokens(max_delegation,true)));
 					$('.page-delegate-shares .delegate-shares-max-tokens-amount').attr('data-vesting-shares',max_delegation);
 				}
@@ -896,6 +899,10 @@ function update_shares_balance(el,data){
 	let available_vesting_shares=vesting_shares - delegated_vesting_shares;
 	let floor_available_vesting_shares=Math.floor(100*available_vesting_shares)/100;
 
+	let withdrawn=parseFloat(data.withdrawn);
+	let to_withdraw=parseFloat(data.to_withdraw);
+	let withdraw_amount=to_withdraw-withdrawn;
+
 	let last_vote_time=Date.parse(data.last_vote_time);
 	let delta_time=parseInt((new Date().getTime() - last_vote_time+(new Date().getTimezoneOffset()*60000))/1000);
 	let energy=data.energy;
@@ -909,16 +916,18 @@ function update_shares_balance(el,data){
 	el.find('.received-vesting-shares').html('');
 	el.find('.effective-vesting-shares').html('');
 
-	el.find('.vesting-shares').attr('data-vesting-shares',(floor_vesting_shares).toFixed(2));
-	el.find('.vesting-shares').attr('data-available-vesting-shares',(floor_available_vesting_shares).toFixed(2));
+	el.find('.vesting-shares').data('vesting-shares',(floor_vesting_shares).toFixed(2));
+	el.find('.vesting-shares').data('available-vesting-shares',(floor_available_vesting_shares).toFixed(2));
+	el.find('.vesting-shares').data('withdraw-amount',(withdraw_amount/1000000).toFixed(2));
+
 	el.find('.vesting-shares').append('<span class="adaptive-show">'+ltmp_arr.social_capital_own_adaptive_caption+'&nbsp;</span>'+number_thousands((floor_vesting_shares).toFixed(2))+' viz');
 
-	el.find('.delegated-vesting-shares').attr('data-delegated-vesting-shares',(floor_delegated_vesting_shares).toFixed(2));
+	el.find('.delegated-vesting-shares').data('delegated-vesting-shares',(floor_delegated_vesting_shares).toFixed(2));
 	if(floor_delegated_vesting_shares>0){
 		el.find('.delegated-vesting-shares').append('<div><span class="adaptive-show">'+ltmp_arr.social_capital_delegated_adaptive_caption+'&nbsp;</span>&minus;'+number_thousands((floor_delegated_vesting_shares).toFixed(2))+' viz</div>');
 	}
 
-	el.find('.received-vesting-shares').attr('data-received-vesting-shares',(floor_received_vesting_shares).toFixed(2));
+	el.find('.received-vesting-shares').data('received-vesting-shares',(floor_received_vesting_shares).toFixed(2));
 	if(floor_received_vesting_shares>0){
 		el.find('.received-vesting-shares').append('<div><span class="adaptive-show">'+ltmp_arr.social_capital_received_adaptive_caption+'&nbsp;</span>&plus;'+number_thousands((floor_received_vesting_shares).toFixed(2))+' viz</div>');
 	}
@@ -926,7 +935,7 @@ function update_shares_balance(el,data){
 		el.find('.received-vesting-shares').html('&mdash;');
 	}
 
-	el.find('.effective-vesting-shares').attr('data-effective-vesting-shares',(floor_effective_vesting_shares).toFixed(2));
+	el.find('.effective-vesting-shares').data('effective-vesting-shares',(floor_effective_vesting_shares).toFixed(2));
 	el.find('.effective-vesting-shares').append('<span class="adaptive-show">'+ltmp_arr.social_capital_effective_adaptive_caption+'&nbsp;</span>'+number_thousands((floor_effective_vesting_shares).toFixed(2))+' viz');
 }
 
@@ -2871,6 +2880,8 @@ function view_assets(path,params,title){
 					balance_el.find('.delegated-vesting-shares').html('&hellip;');
 					balance_el.find('.received-vesting-shares').html('&hellip;');
 					balance_el.find('.effective-vesting-shares').html('&hellip;');
+					$('.page-delegate-shares .delegate-shares-max-tokens-amount').html('&hellip;');
+					$('.page-delegate-shares .delegate-shares-max-tokens-amount').attr('data-vesting-shares',0);
 
 					viz.api.getAccounts([current_user],function(err,response){
 						if(err){
@@ -2879,9 +2890,10 @@ function view_assets(path,params,title){
 						else{
 							if(current_user==response[0].name){
 								update_shares_balance(balance_el,response[0]);
-								$('.page-delegate-shares .input-caption .effective-vesting-shares').attr('data-vesting-shares',parseFloat(balance_el.find('.vesting-shares').attr('data-available-vesting-shares')));
-								$('.page-delegate-shares .input-caption .effective-vesting-shares').html(number_thousands(show_balance_in_tokens(parseFloat(balance_el.find('.vesting-shares').attr('data-available-vesting-shares')),true)));
-								calc_max_delegation();
+								$('.page-delegate-shares .input-caption .effective-vesting-shares').attr('data-vesting-shares',parseFloat(balance_el.find('.vesting-shares').data('available-vesting-shares')));
+								$('.page-delegate-shares .input-caption .effective-vesting-shares').html(number_thousands(show_balance_in_tokens(parseFloat(balance_el.find('.vesting-shares').data('available-vesting-shares')),true)));
+								clearTimeout(calc_max_delegation_timer);
+								calc_max_delegation_timer=setTimeout(function(){calc_max_delegation();},1000);
 							}
 						}
 					});
@@ -3957,7 +3969,7 @@ function award(account,energy,memo,el){
 
 	energy=fast_str_replace(',','.',energy);
 	energy=parseFloat(energy).toFixed(2);
-	energy=energy*100;
+	energy=Math.floor(energy*100);
 	page.find('input[name=award-energy]').removeClass('red');
 	if(energy>parseInt($('.page-award .account-balance span[rel=energy]').attr('data-raw'))){
 		page.find('input[name=award-energy]').addClass('red');
@@ -4365,8 +4377,8 @@ function witness_set_props(el){
 				props[i]=page.find('input[name="witness-set-props-'+i+'"]').val();
 				if(-1!==witness_props_percent.indexOf(i)){
 					props[i]=parseInt(parseFloat(props[i])*100);
-					if(props[i]>10000){
-						props[i]=10000;
+					if(props[i]>100000){
+						props[i]=100000;
 					}
 					if(0>props[i]){
 						props[i]=0;
@@ -4480,8 +4492,8 @@ function undelegate_shares(account,el){
 				else{
 					if(current_user==response[0].name){
 						update_shares_balance(balance_el,response[0]);
-						$('.page-delegate-shares .input-caption .effective-vesting-shares').attr('data-vesting-shares',parseFloat(balance_el.find('.vesting-shares').attr('data-available-vesting-shares')));
-						$('.page-delegate-shares .input-caption .effective-vesting-shares').html(number_thousands(show_balance_in_tokens(parseFloat(balance_el.find('.vesting-shares').attr('data-available-vesting-shares')),true)));
+						$('.page-delegate-shares .input-caption .effective-vesting-shares').attr('data-vesting-shares',parseFloat(balance_el.find('.vesting-shares').data('available-vesting-shares')));
+						$('.page-delegate-shares .input-caption .effective-vesting-shares').html(number_thousands(show_balance_in_tokens(parseFloat(balance_el.find('.vesting-shares').data('available-vesting-shares')),true)));
 						calc_max_delegation();
 					}
 				}
@@ -4531,8 +4543,8 @@ function delegate_shares(account,amount,el){
 				else{
 					if(current_user==response[0].name){
 						update_shares_balance(balance_el,response[0]);
-						$('.page-delegate-shares .input-caption .effective-vesting-shares').attr('data-vesting-shares',parseFloat(balance_el.find('.vesting-shares').attr('data-available-vesting-shares')));
-						$('.page-delegate-shares .input-caption .effective-vesting-shares').html(number_thousands(show_balance_in_tokens(parseFloat(balance_el.find('.vesting-shares').attr('data-available-vesting-shares')),true)));
+						$('.page-delegate-shares .input-caption .effective-vesting-shares').attr('data-vesting-shares',parseFloat(balance_el.find('.vesting-shares').data('available-vesting-shares')));
+						$('.page-delegate-shares .input-caption .effective-vesting-shares').html(number_thousands(show_balance_in_tokens(parseFloat(balance_el.find('.vesting-shares').data('available-vesting-shares')),true)));
 						calc_max_delegation();
 					}
 				}
@@ -6416,7 +6428,7 @@ $(document).ready(function(){
 			value_el.html(this.value+('percent'==value_el.attr('rel')?'%':''));
 			if(typeof $(this).attr('data-input-element') != 'undefined'){
 				if(''!=$(this).attr('data-input-element')){
-					let data_raw=$($(this).attr('data-input-element')).attr('data-available-vesting-shares');
+					let data_raw=$($(this).attr('data-input-element')).data('available-vesting-shares');
 					if(typeof data_raw != 'undefined'){
 						let calc_result=parseFloat(data_raw);
 						calc_result=calc_result*parseFloat(this.value)/100;
@@ -6437,8 +6449,8 @@ $(document).ready(function(){
 			let range_slider=$(this).parent().find('.range-slider');
 
 			let other=$('.page-unstake-shares input[name=unstake-shares-tokens-left]');
-			let shares=$('.page-unstake-shares .shares-balance .vesting-shares').attr('data-available-vesting-shares');
-			let all_shares=$('.page-unstake-shares .shares-balance .vesting-shares').attr('data-vesting-shares');
+			let shares=$('.page-unstake-shares .shares-balance .vesting-shares').data('available-vesting-shares');
+			let all_shares=$('.page-unstake-shares .shares-balance .vesting-shares').data('vesting-shares');
 			let withdraw_intervals=28;
 			if(!isNaN(parseInt($('.page-unstake-shares .median-props[rel="withdraw_intervals"]').text()))){
 				withdraw_intervals=parseInt($('.page-unstake-shares .median-props[rel="withdraw_intervals"]').text());
@@ -6487,8 +6499,8 @@ $(document).ready(function(){
 			let range_slider=$(this).parent().find('.range-slider');
 
 			let other=$('.page-unstake-shares input[name=unstake-shares-tokens-amount]');
-			let shares=$('.page-unstake-shares .shares-balance .vesting-shares').attr('data-available-vesting-shares');
-			let all_shares=$('.page-unstake-shares .shares-balance .vesting-shares').attr('data-vesting-shares');
+			let shares=$('.page-unstake-shares .shares-balance .vesting-shares').data('available-vesting-shares');
+			let all_shares=$('.page-unstake-shares .shares-balance .vesting-shares').data('vesting-shares');
 			let withdraw_intervals=28;
 			if(!isNaN(parseInt($('.page-unstake-shares .median-props[rel="withdraw_intervals"]').text()))){
 				withdraw_intervals=parseInt($('.page-unstake-shares .median-props[rel="withdraw_intervals"]').text());
