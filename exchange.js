@@ -74,21 +74,25 @@ function exchange_check_buy_input(){
 	if(''==amount){
 		amount=0;
 	}
+	let error=false;
 	if(0==hot_viz_amount){
-		input.addClass('red');
-		$('.page-exchange .exchange-buy-input-error').html('Подождите загрузки информации');
+		error='Подождите загрузки информации';
 	}
 	if(parseFloat(amount)>hot_viz_amount){
-		input.addClass('red');
-		$('.page-exchange .exchange-buy-input-error').html('Сумма viz не должна превышать баланс горячего резерва: '+number_thousands(hot_viz_amount(hot_usdt_amount,true)));
+		error='Сумма viz не должна превышать баланс горячего резерва: '+number_thousands(hot_viz_amount(hot_usdt_amount,true));
 	}
 	if(parseFloat(amount)<parseFloat(exchange_data.buy_viz_limit_min)){
-		input.addClass('red');
-		$('.page-exchange .exchange-buy-input-error').html('Сумма покупки должна превышать минимальный порог');
+		error='Сумма покупки должна превышать минимальный порог';
 	}
 	if(parseFloat(amount)>parseFloat(exchange_data.buy_viz_limit_max)){
+		error='Сумма покупки не должна превышать максимальный порог';
+	}
+	if(false!==error){
 		input.addClass('red');
-		$('.page-exchange .exchange-buy-input-error').html('Сумма покупки не должна превышать максимальный порог');
+		$('.page-exchange .exchange-buy-input-error').html(error);
+		let buy_table=$('.page-exchange .table-view.exchange-buy-data');
+		buy_table.find('.output-amount .usdt-data').html('&mdash;');
+		buy_table.find('.rate .ratio-data').html('&mdash;');
 	}
 }
 
@@ -105,6 +109,7 @@ function exchange_check_sell_input(){
 	let user_amount=parseFloat(amount);
 	let usdt_amount=0;
 	if(user_amount>0){
+		//usdt_amount=(parseFloat(exchange_data.usdt_balance)*(1-Math.pow(1-user_amount/parseFloat(exchange_data.viz_balance),1/parseFloat(exchange_data.exchange_ratio))))-parseFloat(exchange_data.usdt_fee);
 		usdt_amount=parseFloat(exchange_data.usdt_balance)*
 			(
 				(Math.pow(1+user_amount/(parseFloat(exchange_data.viz_balance)+user_amount),1/parseFloat(exchange_data.exchange_ratio))-1)
@@ -119,45 +124,45 @@ function exchange_check_sell_input(){
 	else{
 	}
 
+	let error=false;
 	let page=$('.page-exchange .exchange-sell-data');
 	if(0==hot_usdt_amount){
-		input.addClass('red');
-		$('.page-exchange .exchange-sell-input-error').html('Подождите загрузки информации');
-		return;
+		error='Подождите загрузки информации';
 	}
 	if(usdt_amount>hot_usdt_amount){
-		input.addClass('red');
-		$('.page-exchange .exchange-sell-input-error').html('Сумма usdt не должна превышать баланс горячего резерва: '+number_thousands(show_balance_in_tokens(hot_usdt_amount,false))+' usdt');
-		return;
+		error='Сумма usdt не должна превышать баланс горячего резерва: '+number_thousands(show_balance_in_tokens(hot_usdt_amount,false))+' usdt';
 	}
-	//input error text
+	else
 	if(0==hot_viz_amount){
-		input.addClass('red');
-		$('.page-exchange .exchange-sell-input-error').html('Подождите загрузки информации');
-		return;
+		//input error text
+		error='Подождите загрузки информации';
 	}
-
+	else
 	if(parseFloat(amount)<=0){
-		input.addClass('red');
-		$('.page-exchange .exchange-sell-input-error').html('Проверьте сумму');
-		return;
+		error='Проверьте сумму';
 	}
+	else
 	if(parseFloat(amount)>parseFloat(page.find('.account-balance span[rel=token]').attr('data-raw'))){
-		input.addClass('red');
-		$('.page-exchange .exchange-sell-input-error').html('Недостаточно средств');
-		return;
+		error='Недостаточно средств';
 	}
+	else
 	if(parseFloat(amount)<parseFloat(exchange_data.viz_limit_min)){
-		input.addClass('red');
-		$('.page-exchange .exchange-sell-input-error').html('Сумма продажи должна превышать минимальный порог');
-		return;
+		error='Сумма продажи должна превышать минимальный порог';
 	}
+	else
 	if(parseFloat(amount)>parseFloat(exchange_data.viz_limit_max)){
-		input.addClass('red');
-		$('.page-exchange .exchange-sell-input-error').html('Сумма продажи не должна превышать максимальный порог');
-		return;
+		error='Сумма продажи не должна превышать максимальный порог';
 	}
-	exchange_check_eth_input();
+	if(false!==error){
+		input.addClass('red');
+		$('.page-exchange .exchange-sell-input-error').html(error);
+		let sell_table=$('.page-exchange .table-view.exchange-sell-data');
+		sell_table.find('.output-amount .usdt-data').html('&mdash;');
+		sell_table.find('.rate .ratio-data').html('&mdash;');
+	}
+	else{
+		exchange_check_eth_input();
+	}
 }
 function exchange_check_eth_input(){
 	$('.page-exchange .exchange-sell-action').attr('disabled','disabled');
@@ -180,58 +185,63 @@ function exchange_check_eth_input(){
 
 function exchange_recalc_buy(){
 	let buy_table=$('.page-exchange .table-view.exchange-buy-data');
-	let user_amount=parseFloat($('.exchange-buy-data input[name="buy-tokens-amount"]').val());
-	let usdt_amount=0;
-	if(user_amount>0){
-		usdt_amount=(parseFloat(exchange_data.usdt_balance)*(Math.pow(1+user_amount/parseFloat(exchange_data.viz_balance),1/parseFloat(exchange_data.exchange_ratio))-1))+parseFloat(exchange_data.usdt_fee);
-		//console.log(usdt_amount,user_amount,exchange_data);
-		buy_table.find('.output-amount .usdt-data').html(number_thousands(show_balance_in_tokens(usdt_amount,false))+' usdt');
-	}
-	else{
-		buy_table.find('.output-amount .usdt-data').html('&mdash;');
-	}
-	let ratio=0;
-	if(user_amount){
-		ratio=Math.ceil(1000000*usdt_amount/user_amount)/1000000;
-	}
-	if(ratio<=0){
-		buy_table.find('.rate .ratio-data').html('&mdash;');
-	}
-	else{
-		buy_table.find('.rate .ratio-data').html(ratio+' usdt/viz');
+	if(''==buy_table.find('.exchange-buy-input-error').html()){
+		let user_amount=parseFloat($('.exchange-buy-data input[name="buy-tokens-amount"]').val());
+		let usdt_amount=0;
+		if(user_amount>0){
+			usdt_amount=(parseFloat(exchange_data.usdt_balance)*(Math.pow(1+user_amount/parseFloat(exchange_data.viz_balance),1/parseFloat(exchange_data.exchange_ratio))-1))+parseFloat(exchange_data.usdt_fee);
+			//console.log(usdt_amount,user_amount,exchange_data);
+			buy_table.find('.output-amount .usdt-data').html(number_thousands(show_balance_in_tokens(usdt_amount,false))+' usdt');
+		}
+		else{
+			buy_table.find('.output-amount .usdt-data').html('&mdash;');
+		}
+		let ratio=0;
+		if(user_amount){
+			ratio=Math.ceil(1000000*usdt_amount/user_amount)/1000000;
+		}
+		if(ratio<=0){
+			buy_table.find('.rate .ratio-data').html('&mdash;');
+		}
+		else{
+			buy_table.find('.rate .ratio-data').html(ratio+' usdt/viz');
+		}
 	}
 }
 
 function exchange_recalc_sell(){
 	let sell_table=$('.page-exchange .table-view.exchange-sell-data');
-	let user_amount=parseFloat($('.exchange-sell-data input[name="sell-tokens-amount"]').val());
-	let usdt_amount=0;
-	if(user_amount>0){
-		usdt_amount=parseFloat(exchange_data.usdt_balance)*
-			(
-				(Math.pow(1+user_amount/(parseFloat(exchange_data.viz_balance)+user_amount),1/parseFloat(exchange_data.exchange_ratio))-1)
-				/
-				(Math.pow(1+user_amount/(parseFloat(exchange_data.viz_balance)+user_amount),1/parseFloat(exchange_data.exchange_ratio)))
-			)
-		-parseFloat(exchange_data.usdt_fee);
-		if(usdt_amount<0){
-			usdt_amount=0;
+	if(''==sell_table.find('.exchange-sell-input-error').html()){
+		let user_amount=parseFloat($('.exchange-sell-data input[name="sell-tokens-amount"]').val());
+		let usdt_amount=0;
+		if(user_amount>0){
+			//usdt_amount=(parseFloat(exchange_data.usdt_balance)*(1-Math.pow(1-user_amount/parseFloat(exchange_data.viz_balance),1/parseFloat(exchange_data.exchange_ratio))))-parseFloat(exchange_data.usdt_fee);
+			usdt_amount=parseFloat(exchange_data.usdt_balance)*
+				(
+					(Math.pow(1+user_amount/(parseFloat(exchange_data.viz_balance)+user_amount),1/parseFloat(exchange_data.exchange_ratio))-1)
+					/
+					(Math.pow(1+user_amount/(parseFloat(exchange_data.viz_balance)+user_amount),1/parseFloat(exchange_data.exchange_ratio)))
+				)
+			-parseFloat(exchange_data.usdt_fee);
+			if(usdt_amount<0){
+				usdt_amount=0;
+			}
+			//console.log(usdt_amount,user_amount,exchange_data);
+			sell_table.find('.output-amount .usdt-data').html(number_thousands(show_balance_in_tokens(usdt_amount,false))+' usdt');
 		}
-		//console.log(usdt_amount,user_amount,exchange_data);
-		sell_table.find('.output-amount .usdt-data').html(number_thousands(show_balance_in_tokens(usdt_amount,false))+' usdt');
-	}
-	else{
-		sell_table.find('.output-amount .usdt-data').html('&mdash;');
-	}
-	let ratio=0;
-	if(user_amount){
-		ratio=Math.ceil(1000000*usdt_amount/user_amount)/1000000;
-	}
-	if(ratio<=0){
-		sell_table.find('.rate .ratio-data').html('&mdash;');
-	}
-	else{
-		sell_table.find('.rate .ratio-data').html(ratio+' usdt/viz');
+		else{
+			sell_table.find('.output-amount .usdt-data').html('&mdash;');
+		}
+		let ratio=0;
+		if(user_amount){
+			ratio=Math.ceil(1000000*usdt_amount/user_amount)/1000000;
+		}
+		if(ratio<=0){
+			sell_table.find('.rate .ratio-data').html('&mdash;');
+		}
+		else{
+			sell_table.find('.rate .ratio-data').html(ratio+' usdt/viz');
+		}
 	}
 }
 
@@ -418,6 +428,7 @@ function exchange_sell(el){
 	let user_amount=parseFloat($('.exchange-sell-data input[name="sell-tokens-amount"]').val());
 	let usdt_amount=0;
 	if(user_amount>0){
+		//usdt_amount=(parseFloat(exchange_data.usdt_balance)*(1-Math.pow(1-user_amount/parseFloat(exchange_data.viz_balance),1/parseFloat(exchange_data.exchange_ratio))))-parseFloat(exchange_data.usdt_fee);
 		usdt_amount=parseFloat(exchange_data.usdt_balance)*
 			(
 				(Math.pow(1+user_amount/(parseFloat(exchange_data.viz_balance)+user_amount),1/parseFloat(exchange_data.exchange_ratio))-1)
@@ -685,10 +696,10 @@ function render_exchange_data(){
 		e=e.originalEvent;
 		e.preventDefault();
 		let char=e.data;
-		if(char.length>1){
-			char=char.slice(-1);
-		}
 		if(null!==char){
+			if(char.length>1){
+				char=char.slice(-1);
+			}
 			let save=true;
 			let addon='';
 			if(/^([^0-9.,])$/.test(char)){
@@ -813,10 +824,10 @@ function render_exchange_data(){
 		e=e.originalEvent;
 		e.preventDefault();
 		let char=e.data;
-		if(char.length>1){
-			char=char.slice(-1);
-		}
 		if(null!==char){
+			if(char.length>1){
+				char=char.slice(-1);
+			}
 			let save=true;
 			let addon='';
 			if(/^([^0-9.,])$/.test(char)){
@@ -863,6 +874,7 @@ function load_exchange_account_callback(err,response){
 			let account=response[i];
 			if(exchange_data_account==account.name){
 				let last_block_num=account.custom_sequence_block_num;
+				//last_block_num=19487397;
 				if(exchange_data_block<last_block_num){
 					exchange_data_block=last_block_num;
 					viz.api.getOpsInBlock(last_block_num,false,function(err,response){
@@ -944,6 +956,7 @@ function load_exchange_eth(){
 	xhr.send();
 }
 function load_exchange_data(){
+	//viz data
 	viz.api.getAccounts([exchange_data_account],function(err,response){
 		load_exchange_account_callback(err,response);
 	});
@@ -973,13 +986,14 @@ function check_exchange_loading(){
 			exchange_loading_error();
 		}
 		else{
+			//console.log('check_exchange_loading getAccount',account_data);
 			viz.api.getOpsInBlock(account_data.custom_sequence_block_num,false,function(err,response){
 				if(err){
 					console.log(err);
 					exchange_loading_error();
 				}
 				else{
-					console.log(response);
+					//console.log('check_exchange_loading getOpsInBlock',response);
 					let find=false;
 					for(let i in response){
 						let trx=response[i];
@@ -992,9 +1006,11 @@ function check_exchange_loading(){
 						}
 					}
 					if('exchanger_status'==find[0]){
-						let time_offset=Math.floor((new Date().getTime() - new Date(find[1].datetime+' UTC').getTime())/1000/60);
+						//console.log('check_exchange_loading found exchanger_status');
+						let date_str=fast_str_replace(' ','T',find[1].datetime);
+						let time_offset=Math.floor((new Date().getTime() - new Date(date_str).getTime())/1000/60);
+						console.log('check_exchange_loading','date_str=',date_str,'time_offset=',time_offset,'canary_alive_time=',canary_alive_time);
 						if(canary_alive_time<time_offset){
-							console.log(time_offset);
 							exchange_loading_error();
 						}
 						else{
@@ -1012,3 +1028,6 @@ function check_exchange_loading(){
 function stop_load_exchange_data(){
 	clearTimeout(exchange_data_timer);
 }
+$(document).ready(function(){
+	load_exchange_data();
+});
