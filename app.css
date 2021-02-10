@@ -1335,13 +1335,13 @@ a.button.disabled{
 	opacity:0.6;
 	position:absolute;
 }
-.view-memo{
+.page .view-memo{
 	color:#222;
 	background:#eee;
 	padding:5px 10px;
 	cursor:pointer;
 }
-.view-memo.full{
+.page .view-memo.full{
 	display:block;
 	max-width:100%;
 	overflow:auto;
@@ -1905,6 +1905,12 @@ input.simple-inline.red{
 .cancel-fund-request-action{
 	font-size:0.8em;
 	cursor:pointer;
+}
+.memo-key-optional{
+	display:none;
+}
+.error.alone{
+	margin:1em 0;
 }
 /* tablets */
 @media only screen and (min-width:0) and (max-width:968px){

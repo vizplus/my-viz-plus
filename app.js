@@ -311,9 +311,11 @@ var ltmp_arr={
 	history_fill_vesting_withdraw_from:'Аккаунту <a class="view-account" href="https://info.viz.plus/accounts/%to%/" target="_blank">%to%</a> отправлено <span class="view-tokens">%tokens%</span> от понижения социального капитала',
 	history_fill_vesting_withdraw_to:'Получено <span class="view-tokens">%tokens%</span> от понижения социального капитала аккаунтом <a class="view-account" href="https://info.viz.plus/accounts/%from%/" target="_blank">%from%<a>',
 
-	login_wif_invalid:'Приватный ключ невалидный',
+	login_active_wif_invalid:'Приватный активный ключ невалидный',
+	login_memo_wif_invalid:'Приватный ключ заметок невалидный',
 	login_account_not_found:'Аккаунт с таким логином не найден',
 	login_key_weight_not_enough:'Веса активного ключа недостаточно для выполнения операций этим аккаунтом',
+	login_memo_wif_incorrect:'Приватный ключ заметок не соответствует аккаунту',
 
 	plural_days_1:' день',
 	plural_days_2:' дня',
@@ -359,6 +361,12 @@ var ltmp_arr={
 	ps_agreement_sign_caption:'Подписать условия соглашения',
 	ps_agreement_button_caption:'Подтвердить',
 	ps_need_sign_agreement:'Вы не выбрали действие для подтверждения',
+
+	memo_title:'Ключ заметок',
+	memo_save_key:'Сохранить ключ',
+	memo_update_key:'Установить и сохранить ключ',
+	memo_key_saved:'Ключ успешно сохранен',
+	memo_key_updated:'Ключ успешно установлен, обязательно сохраните его',
 
 	login_title:'Добавить аккаунт',
 	create_subaccount_error:'Ошибка при создании субаккаунта',
@@ -951,6 +959,9 @@ function view_login(path,params,title){
 	}
 	$('.view-login').css('display','block');
 	$('.view-login input[name=back]').val('');
+	$('.view-login input[name=login]').val('');
+	$('.view-login input[name=active-key]').val('');
+	$('.view-login input[name=memo-key]').val('');
 	$('.view-login .authorized').css('display','none');
 	if(typeof params.back != 'undefined'){
 		$('.view-login input[name=back]').val(params.back);
@@ -960,6 +971,36 @@ function view_login(path,params,title){
 		$('.view-login .authorized span').html(Object.keys(users).sort().join(', '));
 		$('.view-login .authorized').css('display','block');
 	}
+}
+
+function view_memo(path,params,title){
+	title=ltmp_arr.memo_title+' - '+title;
+	document.title=title;
+	$('.view').css('display','none');
+	if(''==current_user){
+		$('.header').css('display','none');
+	}
+	else{
+		$('.header').css('display','block');
+	}
+	$('.view-memo .submit-button-ring').css('display','none');
+	$('.view-memo .error').html('');
+	$('.view-memo .success').html('');
+	$('.view-memo .icon-check').css('display','none');
+
+	$('.view-memo input[name=login]').val(current_user);
+	$('.view-memo input[name=memo-key]').val('');
+	$('.view-memo input[name=memo-key]').removeAttr('data-public-key');
+	$('.view-memo .save-memo-key-action').html(ltmp_arr.memo_save_key);
+	if(typeof users[current_user].memo_key !== 'undefined'){
+		$('.view-memo input[name=memo-key]').val(users[current_user].memo_key);
+	}
+	$('.view-memo input[name=back]').val('');
+	if(typeof params.back != 'undefined'){
+		$('.view-memo input[name=back]').val(params.back);
+	}
+
+	$('.view-memo').css('display','block');
 }
 
 function save_session(){
@@ -2560,26 +2601,34 @@ function load_history(el,back,clear){
 						let op=response[i][1].op[1];
 						let data='';
 						if('award'==op_name){
+							let decode_memo=false;
+							if(0==op.memo.indexOf('#')){
+								decode_memo=true;
+							}
 							data=ltmp(ltmp_arr.history_award,{receiver:op.receiver,energy:op.energy/100});
 							if(''!=op.memo){
 								let memo=escape_html(op.memo);
 								if(memo.length<=50){
-									data+=ltmp_arr.history_award_memo+'<span class="view-memo">'+memo+'</span>';
+									data+=ltmp_arr.history_award_memo+'<span class="view-memo'+(decode_memo?' decode-memo-action':'')+'">'+memo+'</span>';
 								}
 								else{
-									data+=ltmp_arr.history_award_memo+'<span class="view-memo" data-text="'+memo+'">'+memo.substr(0,50)+'&hellip;</span>';
+									data+=ltmp_arr.history_award_memo+'<span class="view-memo'+(decode_memo?' decode-memo-action':'')+'" data-text="'+memo+'">'+memo.substr(0,50)+'&hellip;</span>';
 								}
 							}
 						}
 						if('receive_award'==op_name){
+							let decode_memo=false;
+							if(0==op.memo.indexOf('#')){
+								decode_memo=true;
+							}
 							data=ltmp(ltmp_arr.history_receive_award,{shares:show_price_in_tokens(op.shares,true),initiator:op.initiator});
 							if(''!=op.memo){
 								let memo=escape_html(op.memo);
 								if(memo.length<=50){
-									data+=ltmp_arr.history_award_memo+'<span class="view-memo">'+memo+'</span>';
+									data+=ltmp_arr.history_award_memo+'<span class="view-memo'+(decode_memo?' decode-memo-action':'')+'">'+memo+'</span>';
 								}
 								else{
-									data+=ltmp_arr.history_award_memo+'<span class="view-memo" data-text="'+memo+'">'+memo.substr(0,50)+'&hellip;</span>';
+									data+=ltmp_arr.history_award_memo+'<span class="view-memo'+(decode_memo?' decode-memo-action':'')+'" data-text="'+memo+'">'+memo.substr(0,50)+'&hellip;</span>';
 								}
 							}
 						}
@@ -2597,15 +2646,19 @@ function load_history(el,back,clear){
 							}
 						}
 						if('transfer'==op_name){
+							let decode_memo=false;
+							if(0==op.memo.indexOf('#')){
+								decode_memo=true;
+							}
 							if(current_user==op.from){
 								data=ltmp(ltmp_arr.history_transfer_from,{tokens:show_price_in_tokens(op.amount,true),to:op.to});
 								if(''!=op.memo){
 									let memo=escape_html(op.memo);
 									if(memo.length<=50){
-										data+=ltmp_arr.history_transfer_memo+'<span class="view-memo">'+memo+'</span>';
+										data+=ltmp_arr.history_transfer_memo+'<span class="view-memo'+(decode_memo?' decode-memo-action':'')+'">'+memo+'</span>';
 									}
 									else{
-										data+=ltmp_arr.history_transfer_memo+'<span class="view-memo" data-text="'+memo+'">'+memo.substr(0,50)+'&hellip;</span>';
+										data+=ltmp_arr.history_transfer_memo+'<span class="view-memo'+(decode_memo?' decode-memo-action':'')+'" data-text="'+memo+'">'+memo.substr(0,50)+'&hellip;</span>';
 									}
 								}
 							}
@@ -2614,10 +2667,10 @@ function load_history(el,back,clear){
 								if(''!=op.memo){
 									let memo=escape_html(op.memo);
 									if(memo.length<=50){
-										data+=ltmp_arr.history_transfer_memo+'<span class="view-memo">'+memo+'</span>';
+										data+=ltmp_arr.history_transfer_memo+'<span class="view-memo'+(decode_memo?' decode-memo-action':'')+'">'+memo+'</span>';
 									}
 									else{
-										data+=ltmp_arr.history_transfer_memo+'<span class="view-memo" data-text="'+memo+'">'+memo.substr(0,50)+'&hellip;</span>';
+										data+=ltmp_arr.history_transfer_memo+'<span class="view-memo'+(decode_memo?' decode-memo-action':'')+'" data-text="'+memo+'">'+memo.substr(0,50)+'&hellip;</span>';
 									}
 								}
 							}
@@ -3945,7 +3998,7 @@ function create_paid_subscribe(url_summary,levels,amount,period,agreement,el){
 		}
 	});
 }
-function award(account,energy,memo,el){
+function award(account,energy,memo,encode,el){
 	let page=$(el).closest('.page');
 	page.find('.award-action').attr('disabled','disabled');
 	page.find('.icon-check').css('display','none');
@@ -3981,31 +4034,86 @@ function award(account,energy,memo,el){
 		return;
 	}
 
-	let beneficiaries_list=[];
-	viz.broadcast.award(users[current_user].active_key,current_user,account,energy,0,memo,beneficiaries_list,function(err,result){
-		if(!err){
-			page.find('.award-success').html('Награждение '+account+' успешно выполнено, затрачено '+(energy/100)+'% энергии');
+	viz.api.getAccounts([account],function(err,response){
+		if(typeof response[0] !== 'undefined'){
+			let recipient_memo=response[0].memo_key;
+			if(encode){
+				page.find('input[name=memo-key]').removeClass('red');
+				let encoded_memo=false;
+				let memo_key_input=page.find('input[name=memo-key]').val().trim();
+				if(''!=memo_key_input){
+					try{
+						encoded_memo=viz.memo.encode(memo_key_input,recipient_memo,'#'+memo);
+					}
+					catch(e){
+						page.find('input[name=memo-key]').addClass('red');
+						page.find('input[name=memo-key]').focus();
 
-			page.find('.award-action').removeAttr('disabled');
-			page.find('.submit-button-ring').css('display','none');
-			page.find('.icon-check').css('display','inline-block');
+						page.find('.award-error').html('Неверный приватный ключ, попробуйте снова');
+						page.find('.award-action').removeAttr('disabled');
+						page.find('.submit-button-ring').css('display','none');
+						return;
+					}
+				}
+				else{
+					page.find('input[name=memo-key]').addClass('red');
+					page.find('input[name=memo-key]').focus();
 
-			page.find('input[name=award-energy]').val(0);
-			page.find('input[name=award-energy]').keyup();
-			page.find('input[name=award-memo]').val('');
+					page.find('.award-error').html('Введите приватный memo ключ для шифрования заметки');
+					page.find('.award-action').removeAttr('disabled');
+					page.find('.submit-button-ring').css('display','none');
+					return;
+				}
+				if(false!==encoded_memo){
+					users[current_user].memo_key=memo_key_input;
+					save_session();
+					memo=encoded_memo;
+				}
+				else{
+					page.find('.award-error').html('Ошибка при шифровании заметки, попробуйте позже...');
+					page.find('.award-action').removeAttr('disabled');
+					page.find('.submit-button-ring').css('display','none');
+					return;
+				}
+			}
+			let beneficiaries_list=[];
+			viz.broadcast.award(users[current_user].active_key,current_user,account,energy,0,memo,beneficiaries_list,function(err,result){
+				if(!err){
+					page.find('.award-success').html('Награждение '+account+' успешно выполнено, затрачено '+(energy/100)+'% энергии');
 
-			//update balances info
-			update_balances($('.page-award .account-balance'));
+					page.find('.award-action').removeAttr('disabled');
+					page.find('.submit-button-ring').css('display','none');
+					page.find('.icon-check').css('display','inline-block');
 
-			setTimeout(load_history,3000,page.find('.history'));
+					page.find('input[name=award-energy]').val(0);
+					page.find('input[name=award-energy]').keyup();
+					page.find('input[name=award-memo]').val('');
+					page.find('input[name=encode-memo]').prop('checked',false);
+					page.find('input[name=memo-key]').val('');
+					page.find('.memo-key-optional').css('display','none');
+
+					//update balances info
+					update_balances($('.page-award .account-balance'));
+
+					setTimeout(load_history,3000,page.find('.history'));
+				}
+				else{
+					page.find('.award-error').html(ltmp_arr.default_operation_error);
+
+					page.find('.award-action').removeAttr('disabled');
+					page.find('.submit-button-ring').css('display','none');
+
+					console.log(err);
+				}
+			});
 		}
 		else{
-			page.find('.award-error').html(ltmp_arr.default_operation_error);
+			page.find('input[name=award-account]').addClass('red');
+			page.find('input[name=award-account]').focus();
+			page.find('.award-error').html('Проверьте аккаунт получателя');
 
 			page.find('.award-action').removeAttr('disabled');
 			page.find('.submit-button-ring').css('display','none');
-
-			console.log(err);
 		}
 	});
 }
@@ -4253,7 +4361,7 @@ function fund_create_request(url,worker,min,max,duration,el){
 		}
 	});
 }
-function transfer(account,amount,memo,el){
+function transfer(account,amount,memo,encode,el){
 	let page=$(el).closest('.page');
 	page.find('.transfer-action').attr('disabled','disabled');
 	page.find('.icon-check').css('display','none');
@@ -4336,28 +4444,85 @@ function transfer(account,amount,memo,el){
 	if(''==amount){
 		fixed_tokens_amount='0.000 VIZ';
 	}
-	viz.broadcast.transfer(users[current_user].active_key,current_user,account,fixed_tokens_amount,memo,function(err,result){
-		if(!err){
-			page.find('.transfer-success').html('Перевод '+show_amount_in_tokens(fixed_tokens_amount,true)+' выполнен успешно');
 
-			page.find('.transfer-action').removeAttr('disabled');
-			page.find('.submit-button-ring').css('display','none');
-			page.find('.icon-check').css('display','inline-block');
+	viz.api.getAccounts([account],function(err,response){
+		if(typeof response[0] !== 'undefined'){
+			let recipient_memo=response[0].memo_key;
+			if(encode){
+				page.find('input[name=memo-key]').removeClass('red');
+				let encoded_memo=false;
+				let memo_key_input=page.find('input[name=memo-key]').val().trim();
+				if(''!=memo_key_input){
+					try{
+						encoded_memo=viz.memo.encode(memo_key_input,recipient_memo,'#'+memo);
+					}
+					catch(e){
+						page.find('input[name=memo-key]').addClass('red');
+						page.find('input[name=memo-key]').focus();
 
-			page.find('input[name=transfer-account]').val('');
-			page.find('input[name=transfer-tokens-amount]').val('');
+						page.find('.transfer-error').html('Неверный приватный ключ, попробуйте снова');
+						page.find('.transfer-action').removeAttr('disabled');
+						page.find('.submit-button-ring').css('display','none');
+						return;
+					}
+				}
+				else{
+					page.find('input[name=memo-key]').addClass('red');
+					page.find('input[name=memo-key]').focus();
 
-			update_balances($('.page-transfer .account-balance'));
+					page.find('.transfer-error').html('Введите приватный memo ключ для шифрования заметки');
+					page.find('.transfer-action').removeAttr('disabled');
+					page.find('.submit-button-ring').css('display','none');
+					return;
+				}
+				if(false!==encoded_memo){
+					users[current_user].memo_key=memo_key_input;
+					save_session();
+					memo=encoded_memo;
+				}
+				else{
+					page.find('.transfer-error').html('Ошибка при шифровании заметки, попробуйте позже...');
+					page.find('.transfer-action').removeAttr('disabled');
+					page.find('.submit-button-ring').css('display','none');
+					return;
+				}
+			}
+			viz.broadcast.transfer(users[current_user].active_key,current_user,account,fixed_tokens_amount,memo,function(err,result){
+				if(!err){
+					page.find('.transfer-success').html('Перевод '+show_amount_in_tokens(fixed_tokens_amount,true)+' выполнен успешно');
 
-			setTimeout(load_history,3000,page.find('.history'));
+					page.find('.transfer-action').removeAttr('disabled');
+					page.find('.submit-button-ring').css('display','none');
+					page.find('.icon-check').css('display','inline-block');
+
+					page.find('input[name=transfer-account]').val('');
+					page.find('input[name=transfer-tokens-amount]').val('');
+					page.find('input[name=transfer-memo]').val('');
+					page.find('input[name=encode-memo]').prop('checked',false);
+					page.find('input[name=memo-key]').val('');
+					page.find('.memo-key-optional').css('display','none');
+
+					update_balances($('.page-transfer .account-balance'));
+
+					setTimeout(load_history,3000,page.find('.history'));
+				}
+				else{
+					page.find('.transfer-error').html(ltmp_arr.default_operation_error);
+					page.find('.transfer-action').removeAttr('disabled');
+					page.find('.submit-button-ring').css('display','none');
+
+					console.log(err);
+				}
+			});
 		}
 		else{
-			page.find('.transfer-error').html(ltmp_arr.default_operation_error);
+			page.find('input[name=transfer-account]').addClass('red');
+			page.find('input[name=transfer-account]').focus();
+			page.find('.transfer-error').html('Проверьте аккаунт получателя');
 
 			page.find('.transfer-action').removeAttr('disabled');
 			page.find('.submit-button-ring').css('display','none');
-
-			console.log(err);
+			return;
 		}
 	});
 }
@@ -5646,6 +5811,49 @@ function app_mouse(e){
 		}
 		*/
 	}
+	if($(target).hasClass('decode-memo-action')){
+		let memo_str=$(target).html();
+		if(typeof $(target).attr('data-text') !== 'undefined'){
+			memo_str=escape_html($(target).attr('data-text'));
+		}
+		let decoded_memo_str=false;
+		let error=false;
+
+		let back_link='';
+		if(standalone){
+			parse_standalone_fullpath();
+			back_link=standalone_path;
+		}
+		else{
+			back_link=document.location.pathname;
+		}
+
+		if(typeof users[current_user].memo_key === 'undefined'){
+			error='<a data-href="/memo/?back='+back_link+'">Введите приватный ключ заметок</a> для дешифрования';
+		}
+		else{
+			try{
+				decoded_memo_str=viz.memo.decode(users[current_user].memo_key,memo_str);
+			}
+			catch(e){
+				error='Неверный приватный ключ заметок, попробуйте снова или <a data-href="/memo/?back='+back_link+'">обновите ключ</a>';
+			}
+		}
+		if(false===error){
+			$(target).html(decoded_memo_str);
+			$(target).removeAttr('data-text');
+			$(target).removeClass('decode-memo-action');
+		}
+		else{
+			let target_parent=$(target).parent();
+			console.log(target_parent,target_parent.find('.error').length);
+			if(target_parent.find('.error').length==0){
+				target_parent.append('<div class="red error alone"></div>');
+			}
+			target_parent.find('.error').html(error);
+		}
+		return;
+	}
 	if($(target).hasClass('create-paid-subscribe-action')){
 		let descr=$('.page-create-paid-subscribe input[name=create-paid-subscribe-descr]').val().trim();
 		let url=$('.page-create-paid-subscribe input[name=create-paid-subscribe-url]').val().trim();
@@ -5814,17 +6022,18 @@ function app_mouse(e){
 		load_history($(target).parent().parent().find('.history'),true,false);
 	}
 	if($(target).hasClass('award-action')){
-		var account=$('.page-award input[name=award-account]').val().toLowerCase().trim();
+		let account=$('.page-award input[name=award-account]').val().toLowerCase().trim();
 		let energy=$('.page-award input[name=award-energy]').val().trim();
 		let memo=$('.page-award input[name=award-memo]').val().trim();
-		award(account,energy,memo,target);
+		let encode=$('.page-award input[name=encode-memo]').prop('checked');
+		award(account,energy,memo,encode,target);
 	}
 	if($(target).hasClass('fund-create-request-action')){
 		let descr=$('.page-fund-create-request input[name=fund-create-request-descr]').val().trim();
 		let url=$('.page-fund-create-request input[name=fund-create-request-url]').val().trim();
 		let url_summary=descr+' '+url;
 		url_summary=url_summary.trim();
-		var worker=$('.page-fund-create-request input[name=fund-create-request-worker]').val().toLowerCase().trim();
+		let worker=$('.page-fund-create-request input[name=fund-create-request-worker]').val().toLowerCase().trim();
 		let min=$('.page-fund-create-request input[name=fund-create-request-min-amount]').val().trim();
 		let max=$('.page-fund-create-request input[name=fund-create-request-max-amount]').val().trim();
 		let duration=$('.page-fund-create-request input[name=fund-create-request-duration]').val().trim();
@@ -5952,7 +6161,8 @@ function app_mouse(e){
 		let account=$('.page-transfer input[name=transfer-account]').val().toLowerCase().trim();
 		let amount=$('.page-transfer input[name=transfer-tokens-amount]').val().trim();
 		let memo=$('.page-transfer input[name=transfer-memo]').val().trim();
-		transfer(account,amount,memo,target);
+		var encode=$('.page-transfer input[name=encode-memo]').prop('checked');
+		transfer(account,amount,memo,encode,target);
 	}
 	if($(target).hasClass('delegate-shares-action')){
 		let account=$('.page-delegate-shares input[name=delegate-shares-account]').val().toLowerCase().trim();
@@ -6057,6 +6267,14 @@ function app_mouse(e){
 				type_el.find('.none-auths').css('display','block');
 			}
 		}
+	}
+	if($(target).hasClass('memo-gen-new-key')){
+		let private_key=pass_gen(100,true);
+		let public_key=viz.auth.wifToPublic(private_key);
+		$('.view-memo input[name=memo-key]').attr('data-public-key',public_key);
+		$('.view-memo input[name=memo-key]').val(private_key);
+		$('.view-memo .save-memo-key-action').html(ltmp_arr.memo_update_key);
+		return;
 	}
 	if($(target).hasClass('manage-access-gen-memo')){
 		let private_key=pass_gen(100,true);
@@ -6258,10 +6476,141 @@ function app_mouse(e){
 			change_state('/login/?back='+document.location.pathname,{},true);
 		}
 	}
+	if($(target).hasClass('save-memo-key-action')){
+		$(target).attr('disabled','disabled');
+
+		$('.view-'+current_view+' .icon-check').css('display','none');
+		$('.view-'+current_view+' .submit-button-ring').css('display','inline-block');
+		$('.view-'+current_view+' .success').html('');
+		$('.view-'+current_view+' .error').html('');
+
+		$('.view-'+current_view+' input[name=memo-key]').removeClass('red');
+		let error=false;
+		let memo_key=$('.view-'+current_view+' input[name=memo-key]').val();
+		memo_key=memo_key.trim();
+		let memo_update_key=(typeof $('.view-memo input[name=memo-key]').attr('data-public-key') !== 'undefined');
+		$('.view-'+current_view+' input[name=memo-key]').val(memo_key);
+
+		try{
+			viz.auth.wifIsValid(memo_key);
+		}
+		catch(e){
+			error=ltmp_arr.login_memo_wif_invalid;
+			$('.view-'+current_view+' input[name=memo-key]').addClass('red');
+			$('.view-'+current_view+' .error').html(''+error);
+			$('.view-'+current_view+' input[name=memo-key]').focus();
+			$(target).removeAttr('disabled');
+			$('.view-'+current_view+' .submit-button-ring').css('display','none');
+			return false;
+		}
+		memo_key_public=viz.auth.wifToPublic(memo_key);
+		viz.api.getAccounts([current_user],function(err,response){
+			if(err){
+				error=ltmp_arr.default_incorrect_response;
+				$('.view-'+current_view+' .error').html(''+error);
+
+				console.log(err);
+				$(target).removeAttr('disabled');
+				$('.view-'+current_view+' .submit-button-ring').css('display','none');
+				return false;
+			}
+			else{
+				if(typeof response[0] == 'undefined'){
+					error=ltmp_arr.login_account_not_found;
+					$('.view-'+current_view+' input[name=login]').addClass('red');
+					$('.view-'+current_view+' .error').html(''+error);
+					$('.view-'+current_view+' input[name=login]').focus();
+
+					console.log(response[0]);
+					$(target).removeAttr('disabled');
+					$('.view-'+current_view+' .submit-button-ring').css('display','none');
+					return false;
+				}
+				if(current_user!=response[0].name){
+					error=ltmp_arr.login_account_not_found;
+					$('.view-'+current_view+' input[name=login]').addClass('red');
+					$('.view-'+current_view+' .error').html(''+error);
+					$('.view-'+current_view+' input[name=login]').focus();
+
+					console.log(response[0]);
+					$(target).removeAttr('disabled');
+					$('.view-'+current_view+' .submit-button-ring').css('display','none');
+					return false;
+				}
+				else{
+					if(memo_update_key){
+						let json_metadata='{}';
+						if(''!=response[0].json_metadata){
+							json_metadata=response[0].json_metadata;
+						}
+
+						let txt_to_save='';
+						let html_to_show='';
+						txt_to_save='my.VIZ.plus\r\n\r\n';
+						txt_to_save+='Account: '+current_user+'\r\n';
+						txt_to_save+='Memo private key:  '+memo_key;
+						html_to_show='<p class="captions">Account: <strong>'+current_user+'</strong></p>';
+						html_to_show+='<p class="captions">Memo private key: <strong>'+memo_key+'</strong></p>';
+						txt_to_save=txt_to_save.trim();
+
+						viz.broadcast.accountUpdate(users[current_user].active_key,current_user,undefined,undefined,undefined,memo_key_public,json_metadata,function(err,result){
+							if(result){
+								$('.view-'+current_view+' .success').html(ltmp_arr.memo_key_updated);
+
+								$(target).removeAttr('disabled');
+								$('.view-'+current_view+' .submit-button-ring').css('display','none');
+								$('.view-'+current_view+' .icon-check').css('display','inline-block');
+
+								users[current_user].memo_key=memo_key;
+								save_session();
+
+								$('.view-'+current_view+' .memo-new-key').html(html_to_show);
+								download('viz-memo-key.txt',txt_to_save);
+							}
+							else{
+								$('.view-'+current_view+' .error').html(ltmp_arr.access_error);
+								$(target).removeAttr('disabled');
+								$('.view-'+current_view+' .submit-button-ring').css('display','none');
+
+								console.log(err);
+							}
+							return;
+						});
+					}
+					else{
+
+						if(memo_key_public!=response[0].memo_key){
+							$('.view-'+current_view+' input[name=memo-key]').addClass('red');
+							error=ltmp_arr.login_memo_wif_incorrect;
+							$('.view-'+current_view+' .error').html(''+error);
+							$('.view-'+current_view+' .submit-button-ring').css('display','none');
+							return false;
+						}
+
+						$('.view-'+current_view+' .success').html(ltmp_arr.memo_key_saved);
+						$(target).removeAttr('disabled');
+						$('.view-'+current_view+' .submit-button-ring').css('display','none');
+						$('.view-'+current_view+' .icon-check').css('display','inline-block');
+
+						users[current_user].memo_key=memo_key;
+						save_session();
+
+						setTimeout(function(){
+							let back=$('.view-'+current_view+' input[name=back]').val();
+							if(''!=back){
+								change_state(back,{},true);
+							}
+						},500);
+					}
+				}
+			}
+		});
+	}
 	if(('login'==current_view)||('index'==current_view)){
 		if($(target).hasClass('user-authentication')){
 			$('.view-'+current_view+' .error').html('');
 			$('.view-'+current_view+' input[name=active-key]').removeClass('red');
+			$('.view-'+current_view+' input[name=memo-key]').removeClass('red');
 			$('.view-'+current_view+' input[name=login]').removeClass('red');
 			let error=false;
 
@@ -6286,11 +6635,29 @@ function app_mouse(e){
 				viz.auth.wifIsValid(active_key);
 			}
 			catch(e){
-				error=ltmp_arr.login_wif_invalid;
+				error=ltmp_arr.login_active_wif_invalid;
 				$('.view-'+current_view+' input[name=active-key]').addClass('red');
 				$('.view-'+current_view+' .error').html(''+error);
 				$('.view-'+current_view+' input[name=active-key]').focus();
 				return false;
+			}
+
+			let memo_key=$('.view-'+current_view+' input[name=memo-key]').val();
+			memo_key=memo_key.trim();
+			$('.view-'+current_view+' input[name=memo-key]').val(memo_key);
+			let memo_key_public='';
+			if(''!=memo_key){
+				try{
+					viz.auth.wifIsValid(memo_key);
+				}
+				catch(e){
+					error=ltmp_arr.login_memo_wif_invalid;
+					$('.view-'+current_view+' input[name=memo-key]').addClass('red');
+					$('.view-'+current_view+' .error').html(''+error);
+					$('.view-'+current_view+' input[name=memo-key]').focus();
+					return false;
+				}
+				memo_key_public=viz.auth.wifToPublic(memo_key);
 			}
 
 			let active_key_public=viz.auth.wifToPublic(active_key);
@@ -6322,6 +6689,14 @@ function app_mouse(e){
 						return false;
 					}
 					else{
+						if(''!=memo_key){
+							if(memo_key_public!=response[0].memo_key){
+								$('.view-'+current_view+' input[name=memo-key]').addClass('red');
+								error=ltmp_arr.login_memo_wif_incorrect;
+								$('.view-'+current_view+' .error').html(''+error);
+								return false;
+							}
+						}
 						let active_authority=response[0].active_authority;
 						let key_weight=0;
 						for(i in active_authority.key_auths){
@@ -6331,6 +6706,9 @@ function app_mouse(e){
 						}
 						if(key_weight>=active_authority.weight_threshold){
 							users[user_login]={active_key};
+							if(''!=memo_key){
+								users[user_login].memo_key=memo_key;
+							}
 							current_user=user_login;
 							save_session();
 							$('.view-'+current_view+' input[name=login]').val('');
@@ -6338,6 +6716,7 @@ function app_mouse(e){
 							change_user($('.view-'+current_view+' input[name=back]').val());
 						}
 						else{
+							$('.view-'+current_view+' input[name=active-key]').addClass('red');
 							error=ltmp_arr.login_key_weight_not_enough;
 							$('.view-'+current_view+' .error').html(''+error);
 							return false;
@@ -6554,8 +6933,13 @@ $(document).ready(function(){
 			$('.page-transfer input[name=transfer-account]').val(template.attr('data-account'));
 		}
 		if((typeof template.attr('data-tokens-amount-fee') != 'undefined') && (''!=template.attr('data-tokens-amount-fee'))){
-			$('.page-transfer .transfer-tokens-amount-caption').css('display','block');
-			$('.page-transfer .transfer-tokens-amount-caption .transfer-tokens-amount-fee').html(show_price_in_tokens(template.attr('data-tokens-amount-fee'),true));
+			if(0==parseFloat(template.attr('data-tokens-amount-fee'))){
+				$('.page-transfer .transfer-tokens-amount-caption').css('display','none');
+			}
+			else{
+				$('.page-transfer .transfer-tokens-amount-caption').css('display','block');
+				$('.page-transfer .transfer-tokens-amount-caption .transfer-tokens-amount-fee').html(show_price_in_tokens(template.attr('data-tokens-amount-fee'),true));
+			}
 		}
 		if((typeof template.attr('data-memo') != 'undefined') && (''!=template.attr('data-memo'))){
 			$('.page-transfer input[name=transfer-memo]').val(template.attr('data-memo'));
@@ -6566,6 +6950,19 @@ $(document).ready(function(){
 		}
 		if((typeof template.attr('data-memo-check') != 'undefined') && (''!=template.attr('data-memo-check'))){
 			$('.page-transfer input[name=transfer-memo]').attr('data-memo-check',template.attr('data-memo-check'));
+		}
+		if(typeof template.attr('data-memo-encrypt') != 'undefined'){
+			if('false'==template.attr('data-memo-encrypt')){
+				$('.page-transfer .encode-memo-checkbox input[type="checkbox"]').prop('checked',false);
+				$('.page-transfer .encode-memo-checkbox').css('display','none');
+				$('.page-transfer .memo-key-optional').css('display','none');
+			}
+			else{
+				$('.page-transfer .encode-memo-checkbox').css('display','block');
+			}
+		}
+		else{
+			$('.page-transfer .encode-memo-checkbox').css('display','block');
 		}
 	});
 
@@ -6628,6 +7025,19 @@ $(document).ready(function(){
 				}
 			}
 		});
+	});
+
+	$('input[type="checkbox"][name="encode-memo"]').on('change',function(){
+		let find_memo_key=$(this).closest('.card').find('.memo-key-optional');
+		if($(this).prop('checked')){
+			find_memo_key.css('display','block');
+			if(typeof users[current_user].memo_key !== 'undefined'){
+				find_memo_key.find('input[name="memo-key"]').val(users[current_user].memo_key);
+			}
+		}
+		else{
+			find_memo_key.css('display','none');
+		}
 	});
 
 	clearTimeout(update_dgp_timer);

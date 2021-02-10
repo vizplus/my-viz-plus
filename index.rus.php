@@ -70,6 +70,13 @@
 								<input type="text" name="active-key" class="simple-rounded">
 							</label>
 						</p>
+						<p>
+							<label class="input-descr">
+								<span class="input-caption">Приватный ключ заметок:</span>
+								<input type="text" name="memo-key" class="simple-rounded">
+								<span class="input-caption text-small grey captions">(опционально)</span>
+							</label>
+						</p>
 						<!--
 							<p><input type="text" class="simple-rounded" name="login"> &mdash; аккаунт</p>
 							<p><input type="text" class="simple-rounded" name="active-key"> &mdash; приватный активный ключ</p>
@@ -81,11 +88,6 @@
 					<div class="session-manage">
 						<div class="sessions"></div>
 					</div>
-					<!--
-						<div>
-							<a class="portable-version-action">Доступна автономная версия сайта</a>
-						</div>
-					-->
 					<div>
 						<a class="nodes-config-action">Настроить подключение к ноде (необязательно)</a>
 					</div>
@@ -130,10 +132,13 @@
 							<input type="text" name="active-key" class="simple-rounded">
 						</label>
 					</p>
-					<!--
-						<p><input type="text" class="simple-rounded" name="login"> &mdash; аккаунт</p>
-						<p><input type="text" class="simple-rounded" name="active-key"> &mdash; приватный активный ключ</p>
-					-->
+					<p>
+						<label class="input-descr">
+							<span class="input-caption">Приватный ключ заметок:</span>
+							<input type="text" name="memo-key" class="simple-rounded">
+							<span class="input-caption text-small grey captions">(опционально)</span>
+						</label>
+					</p>
 					<p class="red error"></p>
 					<p><a class="button user-authentication">Подключить аккаунт</a></p>
 					<div class="addon captions">
@@ -143,6 +148,36 @@
 								Вы уже вошли под следующими аккаунтами: <span></span><br>
 								Для управления ими <a data-href="/">перейдите по ссылке</a>.
 						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="view view-memo">
+				<div class="card">
+					<input type="hidden" name="back" value="">
+					<p>
+						<label class="input-descr">
+							<span class="input-caption">Аккаунт:</span>
+							<input type="text" name="login" class="simple-rounded" disabled>
+						</label>
+					</p>
+					<p>
+						<label class="input-descr">
+							<span class="input-caption">Приватный ключ заметок:</span>
+							<input type="text" name="memo-key" class="simple-rounded">
+						</label>
+						<br><span class="input-caption text-small grey captions">(<a class="memo-gen-new-key unselectable">сгенерировать новый</a>)</span>
+					</p>
+					<p class="red error"></p>
+					<p class="green success"></p>
+					<p>
+						<a class="button save-memo-key-action">Сохранить ключ</a>
+						<span class="submit-button-ring"></span>
+						<span class="icon icon-margin hidden icon-color-blue icon-check"></span>
+					</p>
+					<div class="memo-new-key"></div>
+					<div class="addon captions">
+						Ключ сохраняется в вашем браузере и не передается на сервер. Для удаления ключа из браузера отключите аккаунт или очистите кэш браузера.
 					</div>
 				</div>
 			</div>
@@ -617,10 +652,10 @@
 							</div>
 							<div class="column column-3 shadow">
 								<h4 class="center captions">Кошелёк</h4>
-								<div class="tokens-caption captions"><span class="value">&hellip;</span><span class="symbol"> viz</span></div>
+								<div class="tokens-caption standalone captions"><span class="value">&hellip;</span><span class="symbol"> viz</span></div>
 								<div class="wide-buttons captions">
 									<a class="wide-button color-green" data-href="/assets/transfer/">Перевести</a>
-									<a class="wide-button color-green exchange-button" data-href="/assets/exchange/">Обменять</a>
+									<!--<a class="wide-button color-green exchange-button" data-href="/assets/exchange/">Обменять</a>-->
 									<a class="wide-button color-green" data-href="/assets/checks/">Чеки</a>
 								</div>
 							</div>
@@ -1111,7 +1146,9 @@
 								<span class="input-caption">Шаблон:</span>
 								<select name="transfer-template" class="simple-rounded simple-rounded-size">
 									<option value="0" selected>Не используется</option>
-									<option value="1" data-account="xchng" data-tokens-amount-fee="5" data-memo="log:" data-memo-format="log:BITSHARES-LOGIN" data-memo-check="^log:([a-z0-9\-\.]*)$">XCHNG на BitShares</option>
+									<option value="1" data-account="xchng" data-tokens-amount-fee="5" data-memo="log:" data-memo-format="log:BITSHARES-LOGIN" data-memo-check="^log:([a-z0-9\-\.]*)$" data-memo-encrypt="false">XCHNG на BitShares</option>
+									<option value="2" data-account="gls.xchng" data-tokens-amount-fee="0" data-memo="log:" data-memo-format="log:GOLOS-LOGIN" data-memo-check="^log:([a-z0-9\-\.]*)$" data-memo-encrypt="false">XCHNG на GOLOS</option>
+
 								</select>
 							</label>
 						</p>
@@ -1135,6 +1172,15 @@
 								<span class="input-caption text-small grey captions transfer-memo-caption" style="display:none">(формат: <span class="transfer-memo-format">&hellip;</span>)</span>
 							</label>
 						</p>
+						<p class="encode-memo-checkbox">
+							<label class="check color-red">Зашифровать заметку<input type="checkbox" name="encode-memo"><span class="mark"></span></label>
+						</p>
+						<p class="memo-key-optional">
+							<label class="input-descr">
+								<span class="input-caption">Ключ заметок:</span>
+								<input type="text" name="memo-key" class="simple-rounded" placeholder="5K...">
+							</label>
+						</p>
 						<p class="red transfer-error"></p>
 						<p class="green transfer-success"></p>
 						<p>
@@ -1143,7 +1189,10 @@
 							<span class="icon icon-margin hidden icon-color-green icon-check"></span>
 						</p>
 
-						<div class="addon captions"><h3>Подсказка</h3><p>Используйте шаблоны для стандартных переводов, чтобы не допустить ошибку, которая может привести к потере средств.</p></div>
+						<div class="addon captions"><h3>Подсказка</h3>
+							<p>Используйте шаблоны для стандартных переводов, чтобы не допустить ошибку, которая может привести к потере средств.</p>
+							<p>При шифровании ключ заметок будет сохранён в браузере, пока вы не отключите аккаунт. Если у аккаунта нет ключа заметок, сгенерируйте его в разделе <a data-href="/accounts/">Аккаунты</a> - <a data-href="/accounts/manage-access/">Доступы аккаунта</a>.</p>
+						</div>
 
 						<p><hr><a data-href="/assets/">&larr; Вернуться</a></p>
 
@@ -1241,6 +1290,15 @@
 								<input type="text" name="award-memo" class="simple-rounded" placeholder="">
 							</label>
 						</p>
+						<p>
+							<label class="check color-red">Зашифровать заметку<input type="checkbox" name="encode-memo"><span class="mark"></span></label>
+						</p>
+						<p class="memo-key-optional">
+							<label class="input-descr">
+								<span class="input-caption">Ключ заметок:</span>
+								<input type="text" name="memo-key" class="simple-rounded" placeholder="5K...">
+							</label>
+						</p>
 						<p class="red award-error"></p>
 						<p class="green award-success"></p>
 						<p>
@@ -1252,6 +1310,7 @@
 							<h3>Подсказка</h3>
 							<p>На данной странице отображается эффективный социальный капитал, который учитывает делегирование.</p>
 							<p>Реальный размер награды может немного отличаться от указанного.</p>
+							<p>При шифровании ключ заметок будет сохранён в браузере, пока вы не отключите аккаунт. Если у аккаунта нет ключа заметок, сгенерируйте его в разделе <a data-href="/accounts/">Аккаунты</a> - <a data-href="/accounts/manage-access/">Доступы аккаунта</a>.</p>
 						</div>
 
 						<p><hr><a data-href="/assets/">&larr; Вернуться</a></p>
