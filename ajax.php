@@ -7,6 +7,43 @@ function show_price_in_tokens($tokens,$ticker=false){
 	$ceil_tokens=ceil($true_tokens*100)/100;
 	return number_format($ceil_tokens,2,'.',' ').($ticker?' viz':'');
 }
+if('get_short_accounts_on_sale'==$action){
+	header("Access-Control-Allow-Origin:*");
+	header("Content-type:text/html; charset=UTF-8");
+	header('HTTP/1.1 200 Ok');
+	$offset=0;
+	if(isset($_GET['offset'])){
+		$offset=(int)$_GET['offset'];
+	}
+	$perpage=10;
+	$page=0;
+	if(isset($_GET['page'])){
+		$page=(int)$_GET['page'];
+	}
+	if($page<0){
+		$page=0;
+	}
+	$query=' WHERE `status`=0 AND `length`=2 ';
+	if(isset($_GET['search'])){
+		if(''!=$_GET['search']){
+			$query.=' AND `account` LIKE \'%'.$db->prepare($_GET['search']).'%\'';
+		}
+	}
+	$count=$db->table_count('accounts_on_sale',$query);
+	$pages=ceil($count/$perpage);
+	if($page>$pages){
+		$page=$pages-1;
+	}
+	$offset=$page*$perpage;
+	$order='`account` ASC';
+	$result=array();
+	$sql='SELECT * FROM `accounts_on_sale`'.$query.' ORDER BY '.$order.' LIMIT '.$perpage.' OFFSET '.$offset;//`level` ASC, `length` ASC,
+	$q=$db->sql($sql);
+	while($m=$db->row($q)){
+		$result[]=['account'=>$m['account'],'price'=>($m['price']/1000)];
+	}
+	print json_encode($result);
+}
 if('get_accounts_on_sale'==$action){
 	header("Access-Control-Allow-Origin:*");
 	header("Content-type:text/html; charset=UTF-8");
@@ -23,7 +60,7 @@ if('get_accounts_on_sale'==$action){
 	if($page<0){
 		$page=0;
 	}
-	$query=' WHERE `status`=0';
+	$query=' WHERE `status`=0 AND `length`!=2 ';
 	if(isset($_GET['search'])){
 		if(''!=$_GET['search']){
 			$query.=' AND `account` LIKE \'%'.$db->prepare($_GET['search']).'%\'';
