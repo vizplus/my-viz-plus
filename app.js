@@ -93,322 +93,77 @@ function approved_api_node(node,latency){
 }
 /* Localisation Template*/
 function ltmp(ltmp_str,ltmp_args){
-	for(ltmp_i in ltmp_args){
-		ltmp_str=ltmp_str.split('%'+ltmp_i+'%').join(ltmp_args[ltmp_i]);
+	let ltmp_includes_pattern = /%%([a-zA-Z_0-9]*)%%/gi;
+	let ltmp_includes=ltmp_str.match(ltmp_includes_pattern);
+	if(null!=ltmp_includes){
+		for(let ltmp_i in ltmp_includes){
+			let var_name=ltmp_includes[ltmp_i].substr(2);
+			var_name=var_name.substr(0,var_name.length - 2);
+			if(typeof ltmp_arr[var_name] !== 'undefined'){
+				ltmp_str=ltmp_str.split(ltmp_includes[ltmp_i]).join(ltmp(ltmp_arr[var_name]));
+			}
+		}
+	}
+
+	for(let ltmp_i in ltmp_args){
+		ltmp_str=ltmp_str.split('{'+ltmp_i+'}').join(ltmp_args[ltmp_i]);
+	}
+	//remove empty args
+	let ltmp_prop_arr=ltmp_str.match(/\{[a-z_\-]*\}/gm);
+	for(let ltmp_i in ltmp_prop_arr){
+		ltmp_str=ltmp_str.split(ltmp_prop_arr[ltmp_i]).join('');
 	}
 	return ltmp_str;
 }
-var ltmp_arr={
-	/* Node addon */
-	node_request:'Отправляем запрос ноде&hellip;',
-	node_not_respond:'Нода не отвечает',
-	node_wrong_response:'Ответ от ноды не соответствует формату',
-	node_protocol_error:'Адрес ноды должен содержать протокол (http/https/ws/wss)',
-	node_empty_error:'Адрес ноды не может быть пустым',
+function select_lang(lang){
+	if(typeof available_langs[lang] !== 'undefined'){
+		selected_lang=lang;
+		localStorage.setItem('lang',selected_lang);
+		ltmp_arr=window['ltmp_'+lang+'_arr'];
+		preset_template(function(){
+			dom_bindings(function(){
+				if(standalone){
+					parse_standalone_fullpath();
+					change_state(standalone_path+encodeURIComponent(standalone_search),{},false);
+				}
+				else{
+					change_state(document.location.pathname+document.location.search,{},false);
+				}
+			});
+		});
+	}
+}
 
-	/* Index */
-	index_account_caption:'Аккаунт',
-	index_social_capital_caption:'Капитал (viz)',
-	index_balance_caption:'Баланс (viz)',
-	index_energy_caption:'Энергия',
-	index_info_caption:'Информация',
-	index_add_account_button:'Добавить аккаунт',
-	index_info_acc_on_sale:'аккаунт на продаже',
-	index_info_subacc_on_sale:'субаккаунты на продаже',
-	index_info_withdraw:'понижение капитала',
-	index_info_adaptive_caption:'Информация:',
-	index_selected_account:'Выбранный аккаунт',
-	index_login_account_caption:'Использовать аккаунт %account%',
-	index_logout_account_caption:'Отключить аккаунт %account%',
-	index_social_capital_adaptive_caption:'Капитал (viz):',
-	index_balance_adaptive_caption:'Баланс (viz):',
-	index_energy_adaptive_caption:'Энергия (viz):',
-	index_selected_node:'Используемая нода',
-	index_remove_node:'удалить',
-	index_add_node_caption:'Добавить ноду:',
-	index_add_node_button:'Подтвердить',
-
-	/* Manage Profile */
-	save_profile_success:'Профиль успешно сохранен',
-
-	/* Access */
-	access_remove_caption:'удалить',
-	access_weight_caption:'вес %weight%',
-	access_need_regular_weight:'Суммарный вес для обычного типа доступа меньше необходимого',
-	access_need_active_weight:'Суммарный вес для активного типа доступа меньше необходимого',
-	access_need_master_weight:'Суммарный вес для главного типа доступа меньше необходимого',
-	access_saved_successfully:'Схема доступа успешно сохранена',
-	access_save_keys:', обязательно скопируйте новые ключи',
-	access_error:'Ошибка в запросе, проверьте главный ключ и попробуйте позже',
-	access_invalid_master_weight_threshold:'Необходимый вес для главного типа доступа недействительный',
-	access_invalid_active_weight_threshold:'Необходимый вес для активного типа доступа недействительный',
-	access_invalid_regular_weight_threshold:'Необходимый вес для обычного типа доступа недействительный',
-	access_reset_success:'Ключи успешно сброшены, обязательно сохраните их',
-	access_loaded:'Схема доступов аккаунта успешно загружена',
-
-	/* Witnesses */
-	witness_vote_caption:'Проголосовать за делегата %witness%',
-	witness_unvote_caption:'Снять голос с делегата %witness%',
-	witness_props_caption:'параметры',
-	witness_url_caption:'ссылка',
-	witness_votes_weight_caption:'Вес голосов',
-	witness_user_vote_weight_caption:'Вес вашего голоса',
-	witness_node_version_caption:'Версия ноды: ',
-	witness_hardfork_vote_caption:'Голосует за новый хардфорк: ',
-	witness_hardfork_vote_starting_caption:' начиная с %date%',
-	witness_penalty_caption:'Штраф за пропуск блоков: ',
-	witness_show_inactive_link:'Показать деактивированных делегатов',
-	witness_set_props_button:'Отправить',
-	witness_set_props_success:'Голосуемые параметры успешно отправлены',
-	witness_set_props_error:'Ошибка: проверьте измененные поля',
-
-	/* Delegations */
-	social_capital_own_adaptive_caption:'Собственный:',
-	social_capital_delegated_adaptive_caption:'Делегировано:',
-	social_capital_received_adaptive_caption:'Получено:',
-	social_capital_effective_adaptive_caption:'Эффективный:',
-	delegations_account_adaptive_caption:'Аккаунт:',
-	delegations_social_capital_adaptive_caption:'Капитал:',
-	delegations_revocation_button:'Отозвать',
-	delegations_revocation_info:'Отзыв возможен после %date%',
-	delegations_awaiting_return:'Ожидают возвращения',
-	delegation_success:'Делегирование успешно выполнено',
-
-	/* Fund */
-	fund_request_vote_list_from:' от ',
-	fund_request_vote_list_shares_amount:' эффективный капитал: ',
-	fund_request_votes_count:'Всего голосов: ',
-	fund_request_votes_shares_amount:'Доля проголосовавших от всей сети: ',
-	fund_request_votes_shares_required:'требуется',
-	fund_request_calculated_amount:'Рассчитанная сумма заявки на текущий момент: ',
-	fund_request_title_caption:'Заявка #<span class="request-id">%id%</span>',
-	fund_request_start_time_caption:'Создана: ',
-	fund_request_cancel_caption:'Отменить заявку',
-	fund_request_descr_caption:'Наименование: ',
-	fund_request_url_caption:'Ссылка: ',
-	fund_request_creator_caption:'Заявитель: ',
-	fund_request_worker_caption:'Исполнитель: ',
-	fund_request_min_amount_caption:'Минимальная сумма исполнения заявки: ',
-	fund_request_max_amount_caption:'Запрашиваемая сумма: ',
-	fund_request_conclusion_time_caption:'Время рассмотрения: ',
-	fund_request_end_time_caption:'Время завершения: ',
-	fund_request_conclusion_payout_amount_caption:'Согласованная сумма: ',
-	fund_request_status_caption:'Статус: ',
-	fund_request_payout_amount_caption:'Выплачено: ',
-	fund_request_remain_payout_amount_caption:'Осталось выплатить: ',
-	fund_request_last_payout_time_caption:'Время последней выплаты: ',
-	fund_request_vote_weight_caption:'Процент удовлетворения заявки от запрашиваемой суммы:',
-	fund_request_vote_button:'Проголосовать',
-	fund_request_votes_caption:'Голоса по заявке',
-
-	/* Accounts, Subaccounts on sale */
-	ba_response_error:'Такой аккаунт не найден, попробуйте позже',
-	ba_account_not_found:'Такой аккаунт не найден',
-	ba_account_not_on_sale:'Данный аккаунт не был выставлен на продажу',
-	bsa_response_error:'Аккаунт продавца не найден, попробуйте позже',
-	bsa_account_not_found:'Такой аккаунт продавца не найден',
-	bsa_accounts_not_on_sale:'Данный субаккаунт не доступен к покупке',
-
-	/* Witness params */
-	witness_props_captions:{
-		account_creation_fee:'Передаваемая комиссия при создании аккаунта',
-		create_account_delegation_ratio:'Коэффициент наценки делегирования при создании аккаунта',
-		create_account_delegation_time:'Срок делегирования при создании аккаунта (в секундах)',
-		bandwidth_reserve_percent:'Доля сети, выделяемая для резервной пропускной способности',
-		bandwidth_reserve_below:'Резервная пропускная способность действует для аккаунтов с долей сети до порога',
-		committee_request_approve_min_percent:'Минимальная доля совокупного социального капитала для решения по заявке в Фонде ДАО',
-		min_delegation:'Минимальное количество токенов при делегировании',
-		vote_accounting_min_rshares:'Минимальный вес голоса для учёта при награждении (reward shares)',
-		maximum_block_size:'Максимальный размер блока в сети (в байтах)',
-		inflation_witness_percent:'Доля эмиссии, идущая на вознаграждение делегатов',
-		inflation_ratio_committee_vs_reward_fund:'Доля оставшейся эмиссии, идущая в Фонд ДАО (остальное - в Фонд наград)',
-		inflation_recalc_period:'Количество блоков между пересчётом инфляционной модели',
-		data_operations_cost_additional_bandwidth:'Дополнительная наценка пропускной способности за каждую data операцию в транзакции',
-		witness_miss_penalty_percent:'Штраф делегату за пропуск блока в процентах от суммарного веса голосов',
-		witness_miss_penalty_duration:'Длительность штрафа делегату за пропуск блока в секундах',
-		create_invite_min_balance:'Минимальная сумма чека',
-		committee_create_request_fee:'Плата за создание заявки в Фонд ДАО',
-		create_paid_subscription_fee:'Плата за создание платной подписки',
-		account_on_sale_fee:'Плата за выставление аккаунта на продажу',
-		subaccount_on_sale_fee:'Плата за выставление субаккаунтов на продажу',
-		witness_declaration_fee:'Плата за объявление аккаунта делегатом',
-		withdraw_intervals:'Количество периодов (дней) уменьшения капитала',
-	},
-
-	/* Witness props order on manage page*/
-	witness_props_order:[
-		'maximum_block_size',
-		'account_creation_fee',
-		'create_account_delegation_ratio',
-		'create_account_delegation_time',
-		'min_delegation',
-		'create_invite_min_balance',
-		'bandwidth_reserve_percent',
-		'bandwidth_reserve_below',
-		'vote_accounting_min_rshares',
-		'withdraw_intervals',
-		'committee_request_approve_min_percent',
-		'inflation_witness_percent',
-		'inflation_ratio_committee_vs_reward_fund',
-		'inflation_recalc_period',
-		'data_operations_cost_additional_bandwidth',
-		'witness_miss_penalty_percent',
-		'witness_miss_penalty_duration',
-		'committee_create_request_fee',
-		'create_paid_subscription_fee',
-		'account_on_sale_fee',
-		'subaccount_on_sale_fee',
-		'witness_declaration_fee',
-		//deprecated:
-		'min_curation_percent',
-		'max_curation_percent',
-		'flag_energy_additional_cost',
-	],
-
-	/* Committee requests status*/
-	request_status_arr:{
-		'0':'На рассмотрении',
-		'1':'Отменена создателем',
-		'2':'Недостаточно голосов',
-		'3':'Минимальная сумма заявки не согласована',
-		'4':'Выплачивается',
-		'5':'Полностью выплачена',
-	},
-
-	/* Invites */
-	invites_code_not_found:'код не найден',
-	invites_check_code_not_found:'проверочный код не найден',
-	invites_invalid_code:'неверный код',
-	invites_code_already_claimed:'чек на %amount% уже погашен %receiver%',
-	invites_claim_success:'Чек успешно погашен аккаунтом %account%',
-	invites_claim_code_not_private:'Введите код погашения, а не проверочный',
-	invites_claim_code_incorrect:'Код погашения недействительный',
-
-	/* Login checks */
-	login_empty_account:'Введите аккаунт',
-	check_login_already_exist:'Логин уже занят, попробуйте другой',
-	check_login_starting_error:'Логин должен начинаться на латинский символ',
-	check_login_ending_error:'Логин должен заканчиваться на латинский символ или цифру',
-	check_login_subaccount_error:'Субаккаунт должен относиться к аккаунту %account%',
-
-	/* History table */
-	history_adaptive_data:'Дата:',
-	history_adaptive_item:'Запись:',
-	history_award:'Награждение <a class="view-account" href="https://info.viz.plus/accounts/%receiver%/" target="_blank">%receiver%</a> энергией <span class="view-percent">%energy%%</span>',
-	history_award_memo:' с заметкой ',
-	history_receive_award:'Получена награда <span class="view-tokens">%shares%</span> от <a class="view-account" href="https://info.viz.plus/accounts/%initiator%/" target="_blank">%initiator%</a>',
-	history_create_invite:'Выписан чек на <span class="view-tokens">%tokens%</span> с кодом проверки <span class="view-key">%key%</span>',
-	history_claim_invite_balance:'Погашен чек с кодом <span class="view-key">%key%</span>',
-	history_use_invite_balance:'Погашен чек с кодом <span class="view-key">%key%</span>',
-	history_transfer_from:'<span class="view-tokens">%tokens%</span> отправлено <a class="view-account" href="https://info.viz.plus/accounts/%to%/" target="_blank">%to%</a>',
-	history_transfer_to:'<span class="view-tokens">%tokens%</span> получено от <a class="view-account" href="https://info.viz.plus/accounts/%from%/" target="_blank">%from%</a>',
-	history_transfer_memo:' с заметкой ',
-	history_transfer_to_vesting_from:'<span class="view-tokens">%tokens%</span> отправлено в социальный капитал <a class="view-account" href="https://info.viz.plus/accounts/%to%/" target="_blank">%to%</a>',
-	history_transfer_to_vesting_to:'<span class="view-tokens">%tokens%</span> получено в социальный капитал от <a class="view-account" href="https://info.viz.plus/accounts/%from%/" target="_blank">%from%</a>',
-	history_withdraw_vesting_stop:'Остановка понижения социального капитала',
-	history_withdraw_vesting:'Активация понижения социального капитала суммой <span class="view-tokens">%shares%</span>',
-	history_fill_vesting_withdraw:'Получено <span class="view-tokens">%tokens%</span> от понижения социального капитала',
-	history_fill_vesting_withdraw_from:'Аккаунту <a class="view-account" href="https://info.viz.plus/accounts/%to%/" target="_blank">%to%</a> отправлено <span class="view-tokens">%tokens%</span> от понижения социального капитала',
-	history_fill_vesting_withdraw_to:'Получено <span class="view-tokens">%tokens%</span> от понижения социального капитала аккаунтом <a class="view-account" href="https://info.viz.plus/accounts/%from%/" target="_blank">%from%<a>',
-
-	login_active_wif_invalid:'Приватный активный ключ невалидный',
-	login_memo_wif_invalid:'Приватный ключ заметок невалидный',
-	login_account_not_found:'Аккаунт с таким логином не найден',
-	login_key_weight_not_enough:'Веса активного ключа недостаточно для выполнения операций этим аккаунтом',
-	login_memo_wif_incorrect:'Приватный ключ заметок не соответствует аккаунту',
-
-	plural_days_1:' день',
-	plural_days_2:' дня',
-	plural_days_5:' дней',
-
-	/* Paid Subscriptions*/
-	ps_sub_count_caption:'Подписчиков: ',
-	ps_sub_amount_caption:'Сумма платежей: ',
-	ps_agreement_link:'Соглашение',
-	ps_view_link:'Перейти',
-	ps_icon_signed_caption:'Оформлена подписка',
-	ps_adaptive_provider:'Провайдер:',
-	ps_adaptive_period:'Период:',
-	ps_adaptive_levels:'Уровней:',
-	ps_adaptive_amount:'Цена:',
-	ps_adaptive_descr:'Описание',
-	ps_provider_adaptive_caption:'Провайдер:',
-	ps_level_adaptive_caption:'Уровень:',
-	ps_amount_adaptive_caption:'Сумма:',
-	ps_period_adaptive_caption:'Срок:',
-	ps_end_date_adaptive_caption:'Дата завершения:',
-	ps_next_date_adaptive_caption:'Дата пролонгации:',
-	ps_agreement_status_caption:'Статус соглашения',
-	ps_agreement_status_ended:'завершено',
-	ps_agreement_status_active:'активное',
-	ps_agreement_closed_changed_conditions:'Соглашение расторгнуто из-за изменений в условиях соглашения провайдером.',
-	ps_agreement_active_changed_conditions:'Условия соглашения будут изменены при пролонгации',
-	ps_agreement_active_changed_conditions_good:' без увеличения суммы платежа.',
-	ps_agreement_active_changed_conditions_bad:' с увеличением суммы платежа, что приведет к <span class="red">автоматическому завершению соглашения при экспирации</span>. Требуется обновление действующего соглашения.',
-	ps_end_date_caption:'Дата завершения соглашения',
-	ps_auto_renewal_active:'Автоматическая пролонгация включена',
-	ps_next_date_caption:'Дата пролонгации',
-	ps_next_end_date_caption:'Дата завершения действия соглашения',
-	ps_agreement_closed:'Провайдер остановил подписание новых соглашений.',
-	ps_agreement_descr_caption:'Описание',
-	ps_agreement_url_caption:'Соглашение',
-	ps_agreement_amount_caption:'Цена за уровень',
-	ps_agreement_levels_caption:'Количество уровней',
-	ps_agreement_period_caption:'Срок соглашения',
-	ps_agreement_form_level_caption:'Уровень соглашения',
-	ps_agreement_form_sum_amount_caption:'Суммарная стоимость',
-	ps_agreement_form_auto_renewal_caption:'Автоматическая пролонгация<span class="adaptive-hide">&nbsp;соглашения</span>',
-	ps_agreement_sign_caption:'Подписать условия соглашения',
-	ps_agreement_button_caption:'Подтвердить',
-	ps_need_sign_agreement:'Вы не выбрали действие для подтверждения',
-
-	memo_title:'Ключ заметок',
-	memo_save_key:'Сохранить ключ',
-	memo_update_key:'Установить и сохранить ключ',
-	memo_key_saved:'Ключ успешно сохранен',
-	memo_key_updated:'Ключ успешно установлен, обязательно сохраните его',
-
-	login_title:'Добавить аккаунт',
-	create_subaccount_error:'Ошибка при создании субаккаунта',
-	deposit_too_much_attempts:'Вы совершили более 5 попыток за 5 минут, подождите немного и попробуйте снова',
-	deposit_claimed_code:'Код уже был активирован',
-	deposit_incorrect_code:'Код не найден',
-	deposit_broadcast_error:'Неполадки на сервере, попробуйте позже',
-	deposit_success:'Вы успешно активировали код, средства должны поступить в течение 1 минуты',
-	buy_account_error:'Ошибка при покупке аккаунта',
-	buy_account_on_recovery:'Аккаунт находится на восстановлении, его нельзя купить',
-	buy_account_subaccount_is_busy:'Такой субаккаунт уже занят',
-	sell_subaccount_success:'Условия продажи субаккаунтов успешно изменены',
-	set_account_price_success:'Условия продажи аккаунта успешно изменены',
-	create_account_error:'Ошибка при создании аккаунта',
-	transfer_error:'Ошибка при переводе',
-	transfer_success:'Перевод успешно выполнен',
-	withdraw_success:'Уменьшение капитала подтверждено',
-	stop_withdraw_error:'Ошибка в операции остановки',
-
-	/* Market menu */
-	create_paid_subscribe_caption:'Создать',
-	edit_paid_subscribe_caption:'Изменить',
-
-	/* Default captions */
-	default_operation_error:'Ошибка при подтверждении операции',
-	default_no_items:'Записей не найдено.',
-	default_no_items_try_other_page:' Попробуйте перейти на другую страницу',
-	default_no_items_try_other_search:' или задать другие условия поиска',
-	default_no_items_try_other_end:'.',
-	default_incorrect_response:'Ошибка в запросе, попробуйте позже',
-	default_account_not_found_or_incorrect_response:'Аккаунт не найден или ошибка в запросе',
-	default_loading:'Загрузка&hellip;',
-	default_node_not_respond:'Ошибка! Публичная нода не отвечает, попробуйте позже обновив страницу.',
-	default_node_error:'Ошибка в получении данных от публичной ноды, попробуйте позже.',
-	default_prev_page:'&larr; Предыдущая страница',
-	default_next_page:'Следующая страница &rarr;',
-	default_list_items_counter:'Показано',
-	default_select_action:'Выберите действие',
-	default_invalid_master_key:'Главный пароль недействительный',
-	default_date_utc:' UTC',
-	default_return_link:'&larr; Вернуться',
+var langs_arr={
+	'en-US':'en',
+	'en':'en',
+	'ru-RU':'ru',
+	'ru':'ru',
 };
+var available_langs={
+	'en':'English',
+	'ru':'Русский',
+};
+var default_lang='ru';
+var selected_lang=default_lang;
+if(null!=localStorage.getItem('lang')){
+	if(typeof available_langs[localStorage.getItem('lang')] !== 'undefined'){
+		selected_lang=langs_arr[localStorage.getItem('lang')];
+	}
+}
+else{
+	for(let i in window.navigator.languages){
+		if(typeof langs_arr[window.navigator.languages[i]] !== 'undefined'){
+			let try_lang=langs_arr[window.navigator.languages[i]];
+			if(typeof available_langs[try_lang] !== 'undefined'){
+				selected_lang=langs_arr[try_lang];
+				break;
+			}
+		}
+	}
+}
+var ltmp_arr=window['ltmp_'+selected_lang+'_arr'];
+
 function plural_str(number,one,two,five){
 	let n=Math.abs(number);
 	n%=100;
@@ -1404,15 +1159,6 @@ function load_paid_subscriptions(page){
 					data+='<div class="desktop-view-list"><span class="desktop-float-left">'+ltmp_arr.ps_adaptive_descr+'&nbsp;</span><div class="desktop-after-float-left-margin">'+descr+'</div></div>';
 				data+='</div>';
 				data+='</div>';
-				/*
-				data+='<div class="columns-view">';
-				data+='<div class="column-view column-5 column-overflow-scroll"><span class="adaptive-show">Провайдер:&nbsp;</span>'+(active?'<span class="icon icon-20px icon-color-red icon-check" title="Оформлена подписка"></span> ':'')+'<a data-href="/market/paid-subscriptions/'+provider.account+'/" class="small inline-button red no-margin">'+provider.account+'</a></div>';
-				data+='<div class="column-view column-6"><span class="adaptive-show">Срок:&nbsp;</span>'+provider.period+plural_str(provider.period,ltmp_arr.plural_days_1,ltmp_arr.plural_days_2,ltmp_arr.plural_days_5)+'</div>';
-				data+='<div class="column-view column-6"><span class="adaptive-show">Уровней:&nbsp;</span>'+provider.levels+'</div>';
-				data+='<div class="column-view column-6"><span class="adaptive-show">Сумма:&nbsp;</span>'+show_price_in_tokens(provider.amount,true)+'</div>';
-				data+='<div class="column-view column-flex column-overflow-scroll"><span class="adaptive-show">Информация:&nbsp;</span>'+descr+'</div>';
-				data+='</div>';
-				*/
 			}
 			if(''==data){
 				data+='<div class="columns-view"><div class="column-view column-1">';
@@ -1515,6 +1261,73 @@ function load_accounts_on_sale(page){
 			}
 			$('.page-buy-account .accounts-on-sale .table-data').attr('data-page',page);
 			$('.page-buy-account .accounts-on-sale .table-data').html(data);
+		}
+	});
+}
+var load_short_accounts_on_sale_timer=0;
+function load_short_accounts_on_sale(page){
+	page=typeof page==='undefined'?0:page;
+	if(page<0){
+		page=0;
+	}
+	let per_page=10;
+	let offset=page*per_page;
+	let search=$('.page-buy-short-account .accounts-on-sale input[name=account-filter]').val().trim();
+	$('.page-buy-short-account .accounts-on-sale .table-data').html('<div class="columns-view"><div class="column-view column-flex"><p><span class="submit-button-ring" style="display:inline-block"></span> '+ltmp_arr.default_loading+'</p></div></div>');
+	$.ajax({
+		type:'GET',
+		url:'https://my.viz.plus/ajax.php',
+		data:{'action':'get_short_accounts_on_sale',page,search},
+		success:function(response_data){
+			let data='';
+			try{
+				response=JSON.parse(response_data);
+			}
+			catch(err){
+				data='<p class="red">'+ltmp_arr.default_incorrect_response+'</p>';
+
+				console.log(err);
+			}
+			for(i in response){
+				data+='<div class="columns-view">';
+				data+='<div class="column-view column-4">'+response[i].account+'</div>';
+				//data+='<div class="column-view column-4">'+response[i].account_seller+'</div>';
+				data+='<div class="column-view column-flex"><a data-href="/market/buy-short-account/'+response[i].account+'/" class="inline-button red no-margin">'+show_price_in_tokens(response[i].price,true)+'</a></div>';
+				data+='</div>';
+			}
+			if(''==data){
+				data+='<div class="columns-view"><div class="column-view column-1">';
+				data+=ltmp_arr.default_no_items;
+				data+=(page!=0?ltmp_arr.default_no_items_try_other_page+(''!=search?ltmp_arr.default_no_items_try_other_search:''):'')+ltmp_arr.default_no_items_try_other_end;
+				data+='</div></div>';
+				let prev_page=false;
+				if(offset>=per_page){
+					prev_page=true;
+				}
+				if(prev_page){
+					$('.page-buy-short-account .accounts-on-sale .table-footer').html((prev_page?'<a class="short-accounts-on-sale-page-action inline-button red" data-page="'+(page)+'">'+ltmp_arr.default_prev_page+'</a> ':''));
+				}
+				else{
+					$('.page-buy-short-account .accounts-on-sale .table-footer').html('');
+				}
+			}
+			else{
+				let prev_page=false;
+				if(offset>=per_page){
+					prev_page=true;
+				}
+				let next_page=false;
+				if(response.length>=per_page){
+					next_page=true;
+				}
+				$('.page-buy-short-account .accounts-on-sale .table-footer').html(
+					(prev_page?'<a class="short-accounts-on-sale-page-action inline-button red" data-page="'+(page)+'">'+ltmp_arr.default_prev_page+'</a> ':'')+
+					ltmp_arr.default_list_items_counter+': '+(offset+1)+'-'+(offset+response.length)+
+					(next_page?' <a class="short-accounts-on-sale-page-action inline-button red" data-page="'+(2+page)+'">'+ltmp_arr.default_next_page+'</a>':'')
+				);
+			}
+			$('.page-buy-short-account .accounts-on-sale .table-data').attr('data-page',page);
+			$('.page-buy-short-account .accounts-on-sale .table-data').html(data);
 		}
 	});
 }
@@ -1622,7 +1435,7 @@ function load_inactive_paid_subscriptions(){
 					el.find('.amount').html('<span class="adaptive-show">'+ltmp_arr.ps_amount_adaptive_caption+'&nbsp;</span>'+number_thousands(show_price_in_tokens(response.level*response.amount/1000,true)));
 					el.find('.period').html('<span class="adaptive-show">'+ltmp_arr.ps_period_adaptive_caption+'&nbsp;</span>'+response.period+plural_str(response.period,ltmp_arr.plural_days_1,ltmp_arr.plural_days_2,ltmp_arr.plural_days_5));
 					el.find('.end-date').html('<span class="adaptive-show">'+ltmp_arr.ps_end_date_adaptive_caption+'&nbsp;</span>'+show_date(response.end_time,true)+ltmp_arr.default_date_utc);
-					if(response.auto_renewal){//если должна была быть автоматически продлена, то отметить красным
+					if(response.auto_renewal){//if must be auto renewal, color to red
 						el.find('.end-date').addClass('red');
 						//el.find('.end-date').addClass('green');
 					}
@@ -1792,7 +1605,7 @@ function view_market(path,params,title){
 										data+='<label class="check color-red">'+ltmp_arr.ps_agreement_form_auto_renewal_caption+'<input type="checkbox" name="paid-subscribe-auto-renewal" '+(auto_renewal?' checked="checked"':'')+'><span class="mark"></span></label>';
 										data+=`<p><label class="radio color-red">`+ltmp_arr.ps_agreement_sign_caption+`<input type="radio" name="paid-subscribe-agreement" value="true"><span class="mark"></span></label></p>`
 										if(agreement&&!agreement_closed&&auto_renewal){
-											//data+=`<p><label class="radio color-red">Завершить соглашение<input type="radio" name="paid-subscribe-agreement" value="false"><span class="mark"></span></label></p>`;
+											//data+=`<p><label class="radio color-red">`+ltmp_arr.ps_agreement_sign_off_caption+`<input type="radio" name="paid-subscribe-agreement" value="false"><span class="mark"></span></label></p>`;
 										}
 										data+=`<p class="red paid-subscribe-error"></p>
 										<p class="green paid-subscribe-success"></p>
@@ -1999,6 +1812,7 @@ function view_market(path,params,title){
 						}
 					});
 				}
+
 				if('buy-account'==path[2]){
 					if(''!=path[3]){
 						$('.view-'+path[1]+' .page-'+path[2]+' .section').css('display','none');
@@ -2047,6 +1861,54 @@ function view_market(path,params,title){
 						$('.page-buy-account .accounts-on-sale select[name=order]').unbind('change');
 						$('.page-buy-account .accounts-on-sale select[name=order]').bind('change',function(){
 							load_accounts_on_sale(0);
+						});
+					}
+				}
+
+				if('buy-short-account'==path[2]){
+					if(''!=path[3]){
+						$('.view-'+path[1]+' .page-'+path[2]+' .section').css('display','none');
+						viz.api.getAccounts([path[3]],function(err,response){
+							let login='';
+							let offer_price='';
+							let on_sale=false;
+							let error=false;
+							if(err){
+								error=ltmp_arr.ba_response_error;
+								console.log(err);
+							}
+							if(typeof response[0] == 'undefined'){
+								error=ltmp_arr.ba_account_not_found;
+							}
+							if(!response[0].account_on_sale){
+								error=ltmp_arr.ba_account_not_on_sale;
+							}
+							if(!error){
+								$('.view-'+path[1]+' .page-'+path[2]+' .buy-short-account-confirmation input[name=buy-short-account-login]').val(response[0].name);
+								$('.view-'+path[1]+' .page-'+path[2]+' .buy-short-account-confirmation input[name=buy-short-account-offer-price]').attr('data-offer-price',response[0].account_offer_price);
+								$('.view-'+path[1]+' .page-'+path[2]+' .buy-short-account-confirmation input[name=buy-short-account-offer-price]').val(show_price_in_tokens(response[0].account_offer_price,true));
+								$('.view-'+path[1]+' .page-'+path[2]+' .buy-short-account-confirmation .buy-short-account-action').removeAttr('disabled');
+							}
+							if(error){
+								$('.view-'+path[1]+' .page-'+path[2]+' .buy-short-account-confirmation .buy-short-account-action').attr('disabled','disabled');
+								$('.view-'+path[1]+' .page-'+path[2]+' .buy-short-account-error').html(error);
+							}
+							$('.view-'+path[1]+' .page-'+path[2]+' .buy-short-account-confirmation').css('display','block');
+						});
+					}
+					else{
+						$('.view-'+path[1]+' .page-'+path[2]+' .section').css('display','none');
+						$('.view-'+path[1]+' .page-'+path[2]+' .accounts-on-sale').css('display','block');
+
+						let page=0;
+						if(typeof params.page != 'undefined'){
+							page=parseInt(params.page)-1;
+						}
+						load_short_accounts_on_sale(page);
+						$('.page-buy-short-account .accounts-on-sale input[name=account-filter]').unbind('keyup');
+						$('.page-buy-short-account .accounts-on-sale input[name=account-filter]').bind('keyup',function(){
+							clearTimeout(load_short_accounts_on_sale_timer);
+							load_short_accounts_on_sale_timer=setTimeout(load_short_accounts_on_sale,200,0);
 						});
 					}
 				}
@@ -2300,7 +2162,6 @@ function view_market(path,params,title){
 function view_portable(path,params,title){
 	$('.view').css('display','none');
 	if(0<$('.view-'+path[1]).length){
-		document.title=$('.view-'+path[1]).attr('data-title')+' - '+title;
 		$('.view-'+path[1]).css('display','block');
 	}
 }
@@ -2756,6 +2617,12 @@ function view_assets(path,params,title){
 		$('.view-'+path[1]+' .page').css('display','none');
 		if(typeof path[2] != 'undefined'){
 			if(0<$('.view-'+path[1]+' .page-'+path[2]).length){
+				if('booster'==path[2]){
+					//check exchange canary state
+					if(typeof window['booster_init'] === 'function'){
+						setTimeout(function(){booster_init();},1);
+					}
+				}
 				if('exchange'==path[2]){
 					//check exchange canary state
 					if(typeof window['load_exchange_data'] === 'function'){
@@ -3205,7 +3072,7 @@ function update_fund_request(id,votes,votes_update){
 						descr=escape_html(descr);
 						data+=' <span class="adaptive-show-block"></span><span class="view-memo">'+descr+'</span>';
 					}
-					data+='<span class="adaptive-show-block"></span><span class="inline-button date grey small">'+((0==response.status)?'до '+show_date(response.end_time,true):show_date(response.conclusion_time,true))+ltmp_arr.default_date_utc+'</span>\n';
+					data+='<span class="adaptive-show-block"></span><span class="inline-button date grey small">'+((0==response.status)?ltmp_arr.default_until+show_date(response.end_time,true):show_date(response.conclusion_time,true))+ltmp_arr.default_date_utc+'</span>\n';
 					if(0==response.status){
 						data+='<span class="inline-button grey small">'+number_thousands(show_balance_in_tokens(response.required_amount_min))+'&ndash;'+number_thousands(show_balance_in_tokens(response.required_amount_max,true))+'</span>';
 					}
@@ -3213,7 +3080,7 @@ function update_fund_request(id,votes,votes_update){
 						data+='<span class="inline-button red small">'+number_thousands(show_balance_in_tokens(response.conclusion_payout_amount,true))+'</span>';
 					}
 					if(4==response.status){
-						data+='<span class="inline-button color-orange small">'+number_thousands(show_balance_in_tokens(response.payout_amount,true))+' из '+number_thousands(show_balance_in_tokens(response.conclusion_payout_amount,true))+'</span>';
+						data+='<span class="inline-button color-orange small">'+number_thousands(show_balance_in_tokens(response.payout_amount,true))+ltmp_arr.default_out_of+number_thousands(show_balance_in_tokens(response.conclusion_payout_amount,true))+'</span>';
 					}
 					if(5==response.status){
 						data+='<span class="inline-button color-green small">'+number_thousands(show_balance_in_tokens(response.payout_amount,true))+'</span>';
@@ -3471,10 +3338,10 @@ function update_fund_requests(status){
 
 				}
 				if(counter>=per_status){
-					$('.fund-requests[data-status='+status+']').append('<div class="load-more"><a class="inline-button color-orange no-margin fund-show-more-requests captions">Показать остальные заявки &rarr;</a></div>');
+					$('.fund-requests[data-status='+status+']').append('<div class="load-more"><a class="inline-button color-orange no-margin fund-show-more-requests captions">'+ltmp_arr.fund_show_other_requests+'</a></div>');
 				}
 				if(0==response.length){
-					$('.fund-requests[data-status='+status+']').append('<div class="no-results"><p class="captions">Заявок по данным критериям за последние 7 дней не найдено.</p></div>');
+					$('.fund-requests[data-status='+status+']').append('<div class="no-results"><p class="captions">'+ltmp_arr.fund_none_requests+'</p></div>');
 				}
 			}
 			else{
@@ -3552,7 +3419,7 @@ function view_dao(path,params,title){
 					viz.api.getWitnessByAccount(current_user,function(err,response){
 						if(!err){
 							if(null==response){
-								$('.page-witness-params .witness-setup-error').html('Аккаунт не объявлен делегатом');
+								$('.page-witness-params .witness-setup-error').html(ltmp_arr.account_not_witness);
 								$('.page-witness-params .fee-checkbox').css('display','block');
 							}
 							else{
@@ -3561,7 +3428,7 @@ function view_dao(path,params,title){
 									$('.page-witness-params input[name=witness-setup-signing-key]').val(response.signing_key);
 								}
 								else{
-									$('.page-witness-params .witness-setup-error').html('Аккаунт не объявлен делегатом');
+									$('.page-witness-params .witness-setup-error').html(ltmp_arr.account_not_witness);
 								}
 								update_witness_props(response.props);
 							}
@@ -3618,13 +3485,16 @@ function change_state(location,state,save_state){
 	if(typeof state.title == 'undefined'){
 		if(''==path[1]){
 			path[1]='index';
-			title='Главная'+' - '+title;
+			title=ltmp_arr.default_index+' - '+title;
 		}
 		else{
 			if(0<$('.menu-el[data-href="/'+path[1]+'/"]').length){
 				title=$('.menu-el[data-href="/'+path[1]+'/"]').html()+' - '+title;
 			}
-			if(0<$('.view-'+path[1]+' .page-'+path[2]+'').length){
+			if((0<$('.view-'+path[1]+'').length) && (typeof $('.view-'+path[1]+'').attr('data-title') !== 'undefined')){
+				title=$('.view-'+path[1]+'').attr('data-title')+' - '+title;
+			}
+			if((0<$('.view-'+path[1]+' .page-'+path[2]+'').length) && (typeof $('.view-'+path[1]+' .page-'+path[2]+'').attr('data-title') !== 'undefined')){
 				title=$('.view-'+path[1]+' .page-'+path[2]+'').attr('data-title')+' - '+title;
 			}
 		}
@@ -3656,6 +3526,10 @@ function change_state(location,state,save_state){
 	document.title=title;
 	//exec function from path
 	if(typeof window['view_'+path[1]] === 'function'){
+		//stop exchange data updates
+		if(typeof window['stop_booster_updates'] === 'function'){
+			setTimeout(window['stop_booster_updates'],1);
+		}
 		//stop exchange data updates
 		if(typeof window['stop_load_exchange_data'] === 'function'){
 			setTimeout(window['stop_load_exchange_data'],1);
@@ -3773,11 +3647,11 @@ function use_invite(code,el){
 }
 function cancel_fund_request(req_id,el){
 	let page=$(el).closest('.page');
-	var ask=confirm('Вы уверены, что хотите отменить заявку?');
+	var ask=confirm(ltmp_arr.fund_cancel_request_confirmation);
 	if(true==ask){
 		viz.broadcast.committeeWorkerCancelRequest(users[current_user].active_key,current_user,parseInt(req_id),function(err,result){
 			if(!err){
-				page.find('.fund-vote-request-success').html('Вы отменили заявку');
+				page.find('.fund-vote-request-success').html(ltmp_arr.fund_request_canceled_successfully);
 
 				//update request votes
 				setTimeout(update_fund_request,3000,req_id,true,true);
@@ -3810,7 +3684,7 @@ function fund_vote_request(req_id,percent,el){
 	}
 	viz.broadcast.committeeVoteRequest(users[current_user].active_key,current_user,req_id,percent,function(err,result){
 		if(!err){
-			page.find('.fund-vote-request-success').html('Вы успешно оставили свой голос по заявке');
+			page.find('.fund-vote-request-success').html(ltmp_arr.fund_request_vote);
 
 			page.find('.fund-vote-request-action').removeAttr('disabled');
 			page.find('.submit-button-ring').css('display','none');
@@ -3843,7 +3717,7 @@ function set_paid_subscribe(provider,level,amount,period,auto_renewal,agreement,
 	}
 	let summary_amount=parseFloat(amount) * level;
 	if(summary_amount>parseFloat(page.find('.account-balance span[rel=token]').attr('data-raw'))){
-		page.find('.paid-subscribe-error').html('Недостаточно средств');
+		page.find('.paid-subscribe-error').html(ltmp_arr.default_insufficient_funds);
 
 		page.find('.paid-subscribe-action').removeAttr('disabled');
 		page.find('.submit-button-ring').css('display','none');
@@ -3851,7 +3725,7 @@ function set_paid_subscribe(provider,level,amount,period,auto_renewal,agreement,
 	}
 	viz.broadcast.paidSubscribe(users[current_user].active_key,current_user,provider,level,amount,period,auto_renewal,function(err,result){
 		if(!err){
-			page.find('.paid-subscribe-success').html('Операция успешно выполнена');
+			page.find('.paid-subscribe-success').html(ltmp_arr.default_successful_operation);
 
 			page.find('.paid-subscribe-action').removeAttr('disabled');
 			page.find('.submit-button-ring').css('display','none');
@@ -3869,10 +3743,10 @@ function set_paid_subscribe(provider,level,amount,period,auto_renewal,agreement,
 			console.log(err);
 
 			if(-1!=err.cause.data.stack[0].format.indexOf('o.level > 0:')){
-				page.find('.paid-subscribe-error').html('Ошибка: Вы не можете вручную завершить соглашение. Отмените автоматическую пролонгацию и подождите завершения соглашения.');
+				page.find('.paid-subscribe-error').html(ltmp(ltmp_arr.default_error,{text:ltmp_arr.ps_sign_off_error}));
 			}
 			if(-1!=err.cause.data.stack[0].format.indexOf('_db.get_balance(subscriber, TOKEN_SYMBOL) >= summary_amount:')){
-				page.find('.paid-subscribe-error').html('Ошибка: Недостаточно средств.');
+				page.find('.paid-subscribe-error').html(ltmp(ltmp_arr.default_error,{text:ltmp_arr.default_insufficient_funds}));
 			}
 		}
 	});
@@ -3894,7 +3768,7 @@ function create_paid_subscribe(url_summary,levels,amount,period,agreement,el){
 	page.find('.create-paid-subscribe-success').html('');
 	if('block'==page.find('.fee-checkbox').css('display')){
 		if(!page.find('.fee-checkbox input[name="create-paid-subscribe-fee"]').prop('checked')){
-			page.find('.create-paid-subscribe-error').html('Подтвердите согласие с взимаемой комиссией');
+			page.find('.create-paid-subscribe-error').html(ltmp_arr.default_fee_confirmation);
 
 			page.find('.create-paid-subscribe-action').removeAttr('disabled');
 			page.find('.cancel-paid-subscribe-action').removeAttr('disabled');
@@ -3905,7 +3779,7 @@ function create_paid_subscribe(url_summary,levels,amount,period,agreement,el){
 	if(''==url_summary){
 		page.find('input[name=create-paid-subscribe-url]').addClass('red');
 		page.find('input[name=create-paid-subscribe-url]').focus();
-		page.find('.create-paid-subscribe-error').html('Вы не указали условия соглашения');
+		page.find('.create-paid-subscribe-error').html(ltmp_arr.ps_empty_agreement);
 
 		page.find('.create-paid-subscribe-action').removeAttr('disabled');
 		page.find('.cancel-paid-subscribe-action').removeAttr('disabled');
@@ -3919,7 +3793,7 @@ function create_paid_subscribe(url_summary,levels,amount,period,agreement,el){
 		if(levels<=0){
 			page.find('input[name=create-paid-subscribe-levels]').addClass('red');
 			page.find('input[name=create-paid-subscribe-levels]').focus();
-			page.find('.create-paid-subscribe-error').html('Количество уровней должно быть положительным числом');
+			page.find('.create-paid-subscribe-error').html(ltmp_arr.ps_levels_must_be_positive_number);
 
 			page.find('.create-paid-subscribe-action').removeAttr('disabled');
 			page.find('.cancel-paid-subscribe-action').removeAttr('disabled');
@@ -3932,7 +3806,7 @@ function create_paid_subscribe(url_summary,levels,amount,period,agreement,el){
 		if(2<amount.split(',').length){
 			page.find('input[name=create-paid-subscribe-amount]').addClass('red');
 			page.find('input[name=create-paid-subscribe-amount]').focus();
-			page.find('.transfer-error').html('Проверьте стоимость');
+			page.find('.transfer-error').html(ltmp_arr.ps_sum_amount_error);
 
 			page.find('.create-paid-subscribe-action').removeAttr('disabled');
 			page.find('.cancel-paid-subscribe-action').removeAttr('disabled');
@@ -3943,7 +3817,7 @@ function create_paid_subscribe(url_summary,levels,amount,period,agreement,el){
 	}
 	if(2<amount.split('.').length){
 		page.find('input[name=create-paid-subscribe-amount]').addClass('red');
-		page.find('.create-paid-subscribe-error').html('Проверьте стоимость');
+		page.find('.create-paid-subscribe-error').html(ltmp_arr.ps_sum_amount_error);
 
 		page.find('.create-paid-subscribe-action').removeAttr('disabled');
 		page.find('.cancel-paid-subscribe-action').removeAttr('disabled');
@@ -3954,7 +3828,7 @@ function create_paid_subscribe(url_summary,levels,amount,period,agreement,el){
 	page.find('input[name=create-paid-subscribe-amount]').val(parseFloat(amount).toFixed(2));
 	if(parseFloat(amount)<=0){
 		page.find('input[name=create-paid-subscribe-amount]').addClass('red');
-		page.find('.create-paid-subscribe-error').html('Проверьте стоимость');
+		page.find('.create-paid-subscribe-error').html(ltmp_arr.ps_sum_amount_error);
 
 		page.find('.create-paid-subscribe-action').removeAttr('disabled');
 		page.find('.cancel-paid-subscribe-action').removeAttr('disabled');
@@ -3964,7 +3838,7 @@ function create_paid_subscribe(url_summary,levels,amount,period,agreement,el){
 	if(period<=0){
 		page.find('input[name=create-paid-subscribe-period]').addClass('red');
 		page.find('input[name=create-paid-subscribe-period]').focus();
-		page.find('.create-paid-subscribe-error').html('Период действия соглашения должен быть положительным числом');
+		page.find('.create-paid-subscribe-error').html(ltmp_arr.ps_period_must_be_positive_number);
 
 		page.find('.create-paid-subscribe-action').removeAttr('disabled');
 		page.find('.cancel-paid-subscribe-action').removeAttr('disabled');
@@ -3976,11 +3850,11 @@ function create_paid_subscribe(url_summary,levels,amount,period,agreement,el){
 	viz.broadcast.setPaidSubscription(users[current_user].active_key,current_user,url_summary,levels,fixed_amount,period,function(err,result){
 		if(!err){
 			if(agreement){
-				page.find('.create-paid-subscribe-success').html('Операция успешно выполнена. Подписка появится в списке доступных через несколько минут.');
+				page.find('.create-paid-subscribe-success').html(ltmp_arr.ps_agreement_sign_success);
 				page.find('.icon-check[rel=create]').css('display','inline-block');
 			}
 			else{
-				page.find('.create-paid-subscribe-success').html('Операция успешно выполнена. Подписка остановлена.');
+				page.find('.create-paid-subscribe-success').html(ltmp_arr.ps_agreement_sign_off_success);
 				page.find('.icon-check[rel=cancel]').css('display','inline-block');
 			}
 			page.find('.submit-button-ring').css('display','none');
@@ -4013,7 +3887,7 @@ function award(account,energy,memo,encode,el){
 	if((''==account) || (!(/^([a-z0-9\-\.]*)$/).test(account))){
 		page.find('input[name=award-account]').addClass('red');
 		page.find('input[name=award-account]').focus();
-		page.find('.award-error').html('Проверьте аккаунт получателя');
+		page.find('.award-error').html(ltmp_arr.default_recipient_error);
 
 		page.find('.award-action').removeAttr('disabled');
 		page.find('.submit-button-ring').css('display','none');
@@ -4027,7 +3901,7 @@ function award(account,energy,memo,encode,el){
 	if(energy>parseInt($('.page-award .account-balance span[rel=energy]').attr('data-raw'))){
 		page.find('input[name=award-energy]').addClass('red');
 		page.find('input[name=award-energy]').focus();
-		page.find('.award-error').html('Недостаточно энергии');
+		page.find('.award-error').html(ltmp_arr.default_not_enough_energy);
 
 		page.find('.award-action').removeAttr('disabled');
 		page.find('.submit-button-ring').css('display','none');
@@ -4049,7 +3923,7 @@ function award(account,energy,memo,encode,el){
 						page.find('input[name=memo-key]').addClass('red');
 						page.find('input[name=memo-key]').focus();
 
-						page.find('.award-error').html('Неверный приватный ключ, попробуйте снова');
+						page.find('.award-error').html(ltmp_arr.default_incorrect_private_key_try_again);
 						page.find('.award-action').removeAttr('disabled');
 						page.find('.submit-button-ring').css('display','none');
 						return;
@@ -4059,7 +3933,7 @@ function award(account,energy,memo,encode,el){
 					page.find('input[name=memo-key]').addClass('red');
 					page.find('input[name=memo-key]').focus();
 
-					page.find('.award-error').html('Введите приватный memo ключ для шифрования заметки');
+					page.find('.award-error').html(ltmp_arr.default_type_memo_key);
 					page.find('.award-action').removeAttr('disabled');
 					page.find('.submit-button-ring').css('display','none');
 					return;
@@ -4070,7 +3944,7 @@ function award(account,energy,memo,encode,el){
 					memo=encoded_memo;
 				}
 				else{
-					page.find('.award-error').html('Ошибка при шифровании заметки, попробуйте позже...');
+					page.find('.award-error').html(ltmp_arr.default_memo_encode_error);
 					page.find('.award-action').removeAttr('disabled');
 					page.find('.submit-button-ring').css('display','none');
 					return;
@@ -4079,7 +3953,7 @@ function award(account,energy,memo,encode,el){
 			let beneficiaries_list=[];
 			viz.broadcast.award(users[current_user].active_key,current_user,account,energy,0,memo,beneficiaries_list,function(err,result){
 				if(!err){
-					page.find('.award-success').html('Награждение '+account+' успешно выполнено, затрачено '+(energy/100)+'% энергии');
+					page.find('.award-success').html(ltmp(ltmp_arr.award_info_success,{account:account,energy:(energy/100)}));
 
 					page.find('.award-action').removeAttr('disabled');
 					page.find('.submit-button-ring').css('display','none');
@@ -4110,7 +3984,7 @@ function award(account,energy,memo,encode,el){
 		else{
 			page.find('input[name=award-account]').addClass('red');
 			page.find('input[name=award-account]').focus();
-			page.find('.award-error').html('Проверьте аккаунт получателя');
+			page.find('.award-error').html(ltmp_arr.default_recipient_error);
 
 			page.find('.award-action').removeAttr('disabled');
 			page.find('.submit-button-ring').css('display','none');
@@ -4134,7 +4008,7 @@ function create_invite(amount,el){
 		if(2<amount.split(',').length){
 			page.find('input[name=invites-create-amount]').addClass('red');
 			page.find('input[name=invites-create-amount]').focus();
-			page.find('.invites-create-error').html('Проверьте сумму');
+			page.find('.invites-create-error').html(ltmp_arr.default_check_amount);
 
 			page.find('.invites-create-action').removeAttr('disabled');
 			page.find('.submit-button-ring[rel=create]').css('display','none');
@@ -4144,7 +4018,7 @@ function create_invite(amount,el){
 	}
 	if(2<amount.split('.').length){
 		page.find('input[name=invites-create-amount]').addClass('red');
-		page.find('.invites-create-error').html('Проверьте сумму');
+		page.find('.invites-create-error').html(ltmp_arr.default_check_amount);
 
 		page.find('.invites-create-action').removeAttr('disabled');
 		page.find('.submit-button-ring[rel=create]').css('display','none');
@@ -4154,7 +4028,7 @@ function create_invite(amount,el){
 	page.find('input[name=invites-create-amount]').val(amount);
 	if(parseFloat(amount)<=0){
 		page.find('input[name=invites-create-amount]').addClass('red');
-		page.find('.invites-create-error').html('Проверьте сумму');
+		page.find('.invites-create-error').html(ltmp_arr.default_check_amount);
 
 		page.find('.invites-create-action').removeAttr('disabled');
 		page.find('.submit-button-ring[rel=create]').css('display','none');
@@ -4168,7 +4042,7 @@ function create_invite(amount,el){
 	let public_key=viz.auth.wifToPublic(private_key);
 	viz.broadcast.createInvite(users[current_user].active_key,current_user,fixed_tokens_amount,public_key,function(err,result){
 		if(!err){
-			page.find('.invites-create-success').html('Чек на '+show_balance_in_tokens(fixed_tokens_amount,true)+' успешно создан');
+			page.find('.invites-create-success').html(ltmp(ltmp_arr.invite_amount_success,{amount:show_balance_in_tokens(fixed_tokens_amount,true)}));
 
 			page.find('.invites-create-action').removeAttr('disabled');
 			page.find('.submit-button-ring[rel=create]').css('display','none');
@@ -4177,7 +4051,8 @@ function create_invite(amount,el){
 			page.find('input[name=invites-create-amount]').val('');
 
 			page.find('.invites-create').removeClass('hidden');
-			page.find('.invites-create').html('<p>Чек на '+show_balance_in_tokens(fixed_tokens_amount,true)+', код погашения: '+private_key+'</p>');
+
+			page.find('.invites-create').html('<p>'+ltmp(ltmp_arr.invite_info_success,{amount:show_balance_in_tokens(fixed_tokens_amount,true),private_key:private_key})+'</p>');
 			download('viz-check.txt','my.VIZ.plus\r\n\r\Check balance: '+fixed_tokens_amount+'\r\nActivation code: '+private_key+'');
 
 			//update balances info
@@ -4203,7 +4078,7 @@ function fund_create_request(url,worker,min,max,duration,el){
 	page.find('.fund-create-request-success').html('');
 
 	if(!page.find('.fee-checkbox input[name="committee-create-request-fee"]').prop('checked')){
-		page.find('.fund-create-request-error').html('Подтвердите согласие с взимаемой комиссией');
+		page.find('.fund-create-request-error').html(ltmp_arr.default_fee_confirmation);
 
 		page.find('.fund-create-request-action').removeAttr('disabled');
 		page.find('.submit-button-ring').css('display','none');
@@ -4228,7 +4103,7 @@ function fund_create_request(url,worker,min,max,duration,el){
 	if(''==url){
 		page.find('input[name=fund-create-request-url]').addClass('red');
 		page.find('input[name=fund-create-request-url]').focus();
-		page.find('.fund-create-request-error').html('Ссылка на заявку не может быть пустой');
+		page.find('.fund-create-request-error').html(ltmp_arr.fund_request_url_needed);
 
 		page.find('.fund-create-request-action').removeAttr('disabled');
 		page.find('.submit-button-ring').css('display','none');
@@ -4237,7 +4112,7 @@ function fund_create_request(url,worker,min,max,duration,el){
 	if(url.length>256){
 		page.find('input[name=fund-create-request-url]').addClass('red');
 		page.find('input[name=fund-create-request-url]').focus();
-		page.find('.fund-create-request-error').html('Ссылка и описание заявки не должны превышать 256 символов');
+		page.find('.fund-create-request-error').html(ltmp_arr.fund_request_url_limit);
 
 		page.find('.fund-create-request-action').removeAttr('disabled');
 		page.find('.submit-button-ring').css('display','none');
@@ -4246,7 +4121,7 @@ function fund_create_request(url,worker,min,max,duration,el){
 	if((''==worker) || (!(/^([a-z0-9\-\.]*)$/).test(worker))){
 		page.find('input[name=fund-create-request-worker]').addClass('red');
 		page.find('input[name=fund-create-request-worker]').focus();
-		page.find('.fund-create-request-error').html('Проверьте аккаунт исполнителя');
+		page.find('.fund-create-request-error').html(ltmp_arr.fund_request_worker_check);
 
 		page.find('.fund-create-request-action').removeAttr('disabled');
 		page.find('.submit-button-ring').css('display','none');
@@ -4256,7 +4131,7 @@ function fund_create_request(url,worker,min,max,duration,el){
 		if(2<min.split(',').length){
 			page.find('input[name=fund-create-request-min-amount]').addClass('red');
 			page.find('input[name=fund-create-request-min-amount]').focus();
-			page.find('.fund-create-request-error').html('Проверьте минимальную сумму');
+			page.find('.fund-create-request-error').html(ltmp_arr.fund_request_min_amount_check);
 
 			page.find('.fund-create-request-action').removeAttr('disabled');
 			page.find('.submit-button-ring').css('display','none');
@@ -4266,7 +4141,7 @@ function fund_create_request(url,worker,min,max,duration,el){
 	}
 	if(2<min.split('.').length){
 		page.find('input[name=fund-create-request-min-amount]').addClass('red');
-		page.find('.fund-create-request-error').html('Проверьте минимальную сумму');
+		page.find('.fund-create-request-error').html(ltmp_arr.fund_request_min_amount_check);
 
 		page.find('.fund-create-request-action').removeAttr('disabled');
 		page.find('.submit-button-ring').css('display','none');
@@ -4274,9 +4149,9 @@ function fund_create_request(url,worker,min,max,duration,el){
 	}
 	min=fast_str_replace(',','',min);
 	page.find('input[name=fund-create-request-min-amount]').val(min);
-	if(parseFloat(min)<=0){
+	if(parseFloat(min)<0){
 		page.find('input[name=fund-create-request-min-amount]').addClass('red');
-		page.find('.fund-create-request-error').html('Проверьте минимальную сумму');
+		page.find('.fund-create-request-error').html(ltmp_arr.fund_request_min_amount_check);
 
 		page.find('.fund-create-request-action').removeAttr('disabled');
 		page.find('.submit-button-ring').css('display','none');
@@ -4287,7 +4162,7 @@ function fund_create_request(url,worker,min,max,duration,el){
 		if(2<max.split(',').length){
 			page.find('input[name=fund-create-request-max-amount]').addClass('red');
 			page.find('input[name=fund-create-request-max-amount]').focus();
-			page.find('.fund-create-request-error').html('Проверьте максимальную сумму');
+			page.find('.fund-create-request-error').html(ltmp_arr.fund_request_max_amount_check);
 
 			page.find('.fund-create-request-action').removeAttr('disabled');
 			page.find('.submit-button-ring').css('display','none');
@@ -4297,7 +4172,7 @@ function fund_create_request(url,worker,min,max,duration,el){
 	}
 	if(2<max.split('.').length){
 		page.find('input[name=fund-create-request-max-amount]').addClass('red');
-		page.find('.fund-create-request-error').html('Проверьте максимальную сумму');
+		page.find('.fund-create-request-error').html(ltmp_arr.fund_request_max_amount_check);
 
 		page.find('.fund-create-request-action').removeAttr('disabled');
 		page.find('.submit-button-ring').css('display','none');
@@ -4307,7 +4182,7 @@ function fund_create_request(url,worker,min,max,duration,el){
 	page.find('input[name=fund-create-request-max-amount]').val(max);
 	if(parseFloat(max)<=0){
 		page.find('input[name=fund-create-request-max-amount]').addClass('red');
-		page.find('.fund-create-request-error').html('Проверьте максимальную сумму');
+		page.find('.fund-create-request-error').html(ltmp_arr.fund_request_max_amount_check);
 
 		page.find('.fund-create-request-action').removeAttr('disabled');
 		page.find('.submit-button-ring').css('display','none');
@@ -4317,7 +4192,7 @@ function fund_create_request(url,worker,min,max,duration,el){
 	if(min>=max){
 		page.find('input[name=fund-create-request-min-amount]').addClass('red');
 		page.find('input[name=fund-create-request-max-amount]').addClass('red');
-		page.find('.fund-create-request-error').html('Минимальная сумма не может превышать максимальную');
+		page.find('.fund-create-request-error').html(ltmp_arr.fund_request_min_lt_max_needed);
 
 		page.find('.fund-create-request-action').removeAttr('disabled');
 		page.find('.submit-button-ring').css('display','none');
@@ -4327,7 +4202,7 @@ function fund_create_request(url,worker,min,max,duration,el){
 	duration=parseInt(duration);
 	if(isNaN(duration) || (duration<5) || (duration>30)){
 		page.find('input[name=fund-create-request-duration]').addClass('red');
-		page.find('.fund-create-request-error').html('Проверьте срок заявки');
+		page.find('.fund-create-request-error').html(ltmp_arr.fund_request_duration_check);
 
 		page.find('.fund-create-request-action').removeAttr('disabled');
 		page.find('.submit-button-ring').css('display','none');
@@ -4346,7 +4221,7 @@ function fund_create_request(url,worker,min,max,duration,el){
 	duration=duration*3600*24;
 	viz.broadcast.committeeWorkerCreateRequest(users[current_user].active_key,current_user,url,worker,fixed_min,fixed_max,duration,function(err,result) {
 		if(!err){
-			page.find('.fund-create-request-success').html('Заявка подана');
+			page.find('.fund-create-request-success').html(ltmp_arr.fund_request_success);
 			page.find('.fund-create-request-action').removeAttr('disabled');
 			page.find('.submit-button-ring').css('display','none');
 			page.find('.icon-check').css('display','inline-block');
@@ -4382,7 +4257,7 @@ function transfer(account,amount,memo,encode,el){
 	if((''==account) || (!(/^([a-z0-9\-\.]*)$/).test(account))){
 		page.find('input[name=transfer-account]').addClass('red');
 		page.find('input[name=transfer-account]').focus();
-		page.find('.transfer-error').html('Проверьте аккаунт получателя');
+		page.find('.transfer-error').html(ltmp_arr.default_recipient_error);
 
 		page.find('.transfer-action').removeAttr('disabled');
 		page.find('.submit-button-ring').css('display','none');
@@ -4393,7 +4268,7 @@ function transfer(account,amount,memo,encode,el){
 		if(2<amount.split(',').length){
 			page.find('input[name=transfer-tokens-amount]').addClass('red');
 			page.find('input[name=transfer-tokens-amount]').focus();
-			page.find('.transfer-error').html('Проверьте сумму');
+			page.find('.transfer-error').html(ltmp_arr.default_check_amount);
 
 			page.find('.transfer-action').removeAttr('disabled');
 			page.find('.submit-button-ring').css('display','none');
@@ -4403,7 +4278,7 @@ function transfer(account,amount,memo,encode,el){
 	}
 	if(2<amount.split('.').length){
 		page.find('input[name=transfer-tokens-amount]').addClass('red');
-		page.find('.transfer-error').html('Проверьте сумму');
+		page.find('.transfer-error').html(ltmp_arr.default_check_amount);
 
 		page.find('.transfer-action').removeAttr('disabled');
 		page.find('.submit-button-ring').css('display','none');
@@ -4413,7 +4288,7 @@ function transfer(account,amount,memo,encode,el){
 	page.find('input[name=transfer-tokens-amount]').val(amount);
 	if(parseFloat(amount)<=0){
 		page.find('input[name=transfer-tokens-amount]').addClass('red');
-		page.find('.transfer-error').html('Проверьте сумму');
+		page.find('.transfer-error').html(ltmp_arr.default_check_amount);
 
 		page.find('.transfer-action').removeAttr('disabled');
 		page.find('.submit-button-ring').css('display','none');
@@ -4422,7 +4297,7 @@ function transfer(account,amount,memo,encode,el){
 
 	if(parseFloat(amount)>parseFloat(page.find('.account-balance span[rel=token]').attr('data-raw'))){
 		page.find('input[name=transfer-tokens-amount]').addClass('red');
-		page.find('.transfer-error').html('Недостаточно средств');
+		page.find('.transfer-error').html(ltmp_arr.default_insufficient_funds);
 
 		page.find('.transfer-action').removeAttr('disabled');
 		page.find('.submit-button-ring').css('display','none');
@@ -4433,7 +4308,7 @@ function transfer(account,amount,memo,encode,el){
 		memo_check_regexp=new RegExp(memo_check);
 		if(!memo_check_regexp.test(memo)){
 			page.find('input[name=transfer-memo]').addClass('red');
-			page.find('.transfer-error').html('Заметка не соответствует формату шаблона');
+			page.find('.transfer-error').html(ltmp_arr.transfer_memo_not_match_template);
 
 			page.find('.transfer-action').removeAttr('disabled');
 			page.find('.submit-button-ring').css('display','none');
@@ -4460,7 +4335,7 @@ function transfer(account,amount,memo,encode,el){
 						page.find('input[name=memo-key]').addClass('red');
 						page.find('input[name=memo-key]').focus();
 
-						page.find('.transfer-error').html('Неверный приватный ключ, попробуйте снова');
+						page.find('.transfer-error').html(ltmp_arr.default_incorrect_private_key_try_again);
 						page.find('.transfer-action').removeAttr('disabled');
 						page.find('.submit-button-ring').css('display','none');
 						return;
@@ -4470,7 +4345,7 @@ function transfer(account,amount,memo,encode,el){
 					page.find('input[name=memo-key]').addClass('red');
 					page.find('input[name=memo-key]').focus();
 
-					page.find('.transfer-error').html('Введите приватный memo ключ для шифрования заметки');
+					page.find('.transfer-error').html(ltmp_arr.default_type_memo_key);
 					page.find('.transfer-action').removeAttr('disabled');
 					page.find('.submit-button-ring').css('display','none');
 					return;
@@ -4481,7 +4356,7 @@ function transfer(account,amount,memo,encode,el){
 					memo=encoded_memo;
 				}
 				else{
-					page.find('.transfer-error').html('Ошибка при шифровании заметки, попробуйте позже...');
+					page.find('.transfer-error').html(ltmp_arr.default_memo_encode_error);
 					page.find('.transfer-action').removeAttr('disabled');
 					page.find('.submit-button-ring').css('display','none');
 					return;
@@ -4489,7 +4364,7 @@ function transfer(account,amount,memo,encode,el){
 			}
 			viz.broadcast.transfer(users[current_user].active_key,current_user,account,fixed_tokens_amount,memo,function(err,result){
 				if(!err){
-					page.find('.transfer-success').html('Перевод '+show_amount_in_tokens(fixed_tokens_amount,true)+' выполнен успешно');
+					page.find('.transfer-success').html(ltmp(ltmp_arr.transfer_amount_success,{amount:show_amount_in_tokens(fixed_tokens_amount,true)}));
 
 					page.find('.transfer-action').removeAttr('disabled');
 					page.find('.submit-button-ring').css('display','none');
@@ -4518,7 +4393,7 @@ function transfer(account,amount,memo,encode,el){
 		else{
 			page.find('input[name=transfer-account]').addClass('red');
 			page.find('input[name=transfer-account]').focus();
-			page.find('.transfer-error').html('Проверьте аккаунт получателя');
+			page.find('.transfer-error').html(ltmp_arr.default_recipient_error);
 
 			page.find('.transfer-action').removeAttr('disabled');
 			page.find('.submit-button-ring').css('display','none');
@@ -4593,7 +4468,7 @@ function witness_setup(url,public_key,private_key,el){
 
 	if('block'==page.find('.fee-checkbox').css('display')){
 		if(!page.find('.fee-checkbox input[name="witness-declaration-fee"]').prop('checked')){
-			page.find('.witness-setup-error').html('Подтвердите согласие с взимаемой комиссией');
+			page.find('.witness-setup-error').html(ltmp_arr.default_fee_confirmation);
 
 			page.find('.witness-setup-action').removeAttr('disabled');
 			page.find('.submit-button-ring').css('display','none');
@@ -4602,14 +4477,14 @@ function witness_setup(url,public_key,private_key,el){
 	}
 
 	if(''==url){
-		page.find('.witness-setup-error').html('Заполните поле ссылки на заявление делегата');
+		page.find('.witness-setup-error').html(ltmp_arr.witness_url_is_needed);
 		page.find('.witness-setup-action').removeAttr('disabled');
 		page.find('.submit-button-ring[rel=setup]').css('display','none');
 		return;
 	}
 	if(''!=private_key){
 		if(viz.auth.wifToPublic(private_key)!=public_key){
-			page.find('.witness-setup-error').html('Приватный и публичный ключ не соответствуют');
+			page.find('.witness-setup-error').html(ltmp_arr.witness_keys_dont_match);
 			page.find('.witness-setup-action').removeAttr('disabled');
 			page.find('.submit-button-ring[rel=setup]').css('display','none');
 			return;
@@ -4622,7 +4497,7 @@ function witness_setup(url,public_key,private_key,el){
 	}
 	viz.broadcast.witnessUpdate(users[current_user].active_key,current_user,url,public_key,function(err,result){
 		if(!err){
-			page.find('.witness-setup-success').html('Операция успешно выполнена'+(''!=private_key?', сохраните приватный ключ подписи: '+private_key:'')+(deactivation?', делегат деактивирован':''));
+			page.find('.witness-setup-success').html(ltmp_arr.default_successful_operation+(''!=private_key?ltmp_arr.witness_save_signing_key+private_key:'')+(deactivation?ltmp_arr.witness_was_disabled:''));
 
 			page.find('.witness-setup-action').removeAttr('disabled');
 			page.find('.submit-button-ring[rel=setup]').css('display','none');
@@ -4947,6 +4822,51 @@ function buy_account(account_login,offer_price,tokens_amount,el){
 		}
 	});
 }
+function buy_short_account(account_login,offer_price,tokens_amount,el){
+	el.find('.buy-short-account-error').html('');
+	el.find('.buy-short-account-action').attr('disabled','disabled');
+	el.find('.icon-check').css('display','none');
+	el.find('.submit-button-ring').css('display','inline-block');
+	if(''==tokens_amount){
+		tokens_amount=0;
+	}
+	let fixed_tokens_amount=''+parseFloat(tokens_amount).toFixed(3)+' VIZ';
+	let private_key=pass_gen(100,true);
+	let public_key=viz.auth.wifToPublic(private_key);
+	viz.api.getRecoveryRequest(account_login,function(err,response){
+		if(null===response){
+			viz.broadcast.buyAccount(users[current_user].active_key,current_user,account_login,offer_price,public_key,fixed_tokens_amount,function(err,result){
+				if(!err){
+					el.find('.submit-button-ring').css('display','none');
+					el.find('.icon-check').css('display','inline-block');
+
+					el.find('.account-keys .account-login').html(account_login);
+					el.find('.account-keys .master-key').html(private_key);
+					el.find('.account-keys .active-key').html(private_key);
+					el.find('.account-keys .regular-key').html(private_key);
+					el.find('.account-keys .memo-key').html(private_key);
+					el.find('.account-keys').css('display','block');
+
+					download('viz-account.txt','my.VIZ.plus\r\n\r\nAccount login: '+account_login+'\r\nMaster key: '+private_key+'\r\nActive key: '+private_key+'\r\nRegular key: '+private_key+'\r\nMemo key: '+private_key+'');
+
+					update_balances(el.closest('.page').find('.account-balance'));
+				}
+				else{
+					el.find('.buy-short-account-error').html(ltmp_arr.buy_account_error);
+					el.find('.buy-short-account-action').removeAttr('disabled');
+					el.find('.submit-button-ring').css('display','none');
+
+					console.log(err);
+				}
+			});
+		}
+		else{
+			el.find('.buy-short-account-error').html(ltmp_arr.buy_account_on_recovery);
+			el.find('.buy-short-account-action').removeAttr('disabled');
+			el.find('.submit-button-ring').css('display','none');
+		}
+	});
+}
 function set_account_price(account,master_key,seller,offer_price,on_sale,el){
 	if(!viz.auth.isWif(master_key)){
 		el.find('.sell-account-error').html(ltmp_arr.default_invalid_master_key);
@@ -4960,7 +4880,7 @@ function set_account_price(account,master_key,seller,offer_price,on_sale,el){
 
 	if('block'==el.find('.fee-checkbox').css('display')){
 		if(!el.find('.fee-checkbox input[name="account-on-sale-fee"]').prop('checked')){
-			el.find('.sell-account-error').html('Подтвердите согласие с взимаемой комиссией');
+			el.find('.sell-account-error').html(ltmp_arr.default_fee_confirmation);
 
 			el.find('.sell-account-action').removeAttr('disabled');
 			el.find('.submit-button-ring').css('display','none');
@@ -5551,7 +5471,7 @@ function set_subaccount_price(account,master_key,seller,offer_price,on_sale,el){
 
 	if('block'==el.find('.fee-checkbox').css('display')){
 		if(!el.find('.fee-checkbox input[name="subaccount-on-sale-fee"]').prop('checked')){
-			el.find('.sell-subaccount-error').html('Подтвердите согласие с взимаемой комиссией');
+			el.find('.sell-subaccount-error').html(ltmp_arr.default_fee_confirmation);
 
 			el.find('.sell-subaccount-action').removeAttr('disabled');
 			el.find('.submit-button-ring').css('display','none');
@@ -5761,6 +5681,9 @@ function app_mouse(e){
 	if($(target).hasClass('go-top')){
 		$('body,html').animate({scrollTop:0},1000);
 	}
+	if($(target).hasClass('select-lang-action')){
+		select_lang($(target).data('lang'));
+	}
 	if($(target).hasClass('fill-stake-shares-amount-action')){
 		let amount=parseFloat($(target).attr('data-raw'));
 		$('.page-stake-shares input[name=stake-shares-tokens-amount]').val(amount);
@@ -5829,14 +5752,14 @@ function app_mouse(e){
 		}
 
 		if(typeof users[current_user].memo_key === 'undefined'){
-			error='<a data-href="/memo/?back='+back_link+'">Введите приватный ключ заметок</a> для дешифрования';
+			error=ltmp(ltmp_arr.enter_memo_link,{link:back_link});
 		}
 		else{
 			try{
 				decoded_memo_str=viz.memo.decode(users[current_user].memo_key,memo_str);
 			}
 			catch(e){
-				error='Неверный приватный ключ заметок, попробуйте снова или <a data-href="/memo/?back='+back_link+'">обновите ключ</a>';
+				error=ltmp(ltmp_arr.error_update_memo_link,{link:back_link});
 			}
 		}
 		if(false===error){
@@ -5876,6 +5799,11 @@ function app_mouse(e){
 		let page=parseInt($(target).attr('data-page'));
 		page--;
 		load_accounts_on_sale(page);
+	}
+	if($(target).hasClass('short-accounts-on-sale-page-action')){
+		let page=parseInt($(target).attr('data-page'));
+		page--;
+		load_short_accounts_on_sale(page);
 	}
 	if($(target).hasClass('subaccounts-on-sale-page-action')){
 		let page=parseInt($(target).attr('data-page'));
@@ -6137,6 +6065,13 @@ function app_mouse(e){
 			},
 		});
 	}
+	if($(target).hasClass('activate-booster-action')){
+		if(typeof window['booster_code'] === 'function'){
+			let login=$('.page-booster input[name=booster-account]').val().toLowerCase().trim();
+			let code=$('.page-booster input[name=booster-code]').val().trim();
+			booster_code(code,login);
+		}
+	}
 	if($(target).hasClass('exchange-buy-action')){
 		if(typeof window['exchange_buy'] === 'function'){
 			exchange_buy(target);
@@ -6206,6 +6141,12 @@ function app_mouse(e){
 		let offer_price=$('.page-buy-account .buy-account-confirmation input[name=buy-account-offer-price]').attr('data-offer-price');
 		let tokens_amount=$('.page-buy-account .buy-account-confirmation input[name=buy-account-token-to-shares]').val().trim();
 		buy_account(account_login,offer_price,tokens_amount,$('.page-buy-account .buy-account-confirmation'));
+	}
+	if($(target).hasClass('buy-short-account-action')){
+		let account_login=$('.page-buy-short-account .buy-short-account-confirmation input[name=buy-short-account-login]').val().toLowerCase().trim();
+		let offer_price=$('.page-buy-short-account .buy-short-account-confirmation input[name=buy-short-account-offer-price]').attr('data-offer-price');
+		let tokens_amount=$('.page-buy-short-account .buy-short-account-confirmation input[name=buy-short-account-token-to-shares]').val().trim();
+		buy_short_account(account_login,offer_price,tokens_amount,$('.page-buy-short-account .buy-short-account-confirmation'));
 	}
 	if($(target).hasClass('buy-subaccount-action')){
 		let account_login=$('.page-buy-subaccount .buy-subaccount-confirmation input[name=buy-subaccount-login]').val().toLowerCase().trim();
@@ -6728,30 +6669,35 @@ function app_mouse(e){
 	}
 }
 
-var energy_radial;
-$(document).ready(function(){
-	if(!standalone){
-		var hash_load=window.location.hash;
-		if(''!=hash_load){
-			hash_load=hash_load.substr(1);
-			if(-1==hash_load.indexOf('/')){
-				if(0<$('.index[data-index='+hash_load+']').length){
-					$('body,html').animate({scrollTop:parseInt($('.index[data-index='+hash_load+']').offset().top) - 64 - 10},1000);
-				}
+function preset_template(callback){
+	if(typeof callback==='undefined'){
+		callback=function(){};
+	}
+	let available_langs_str='';
+	for(let i in available_langs){
+		available_langs_str+=ltmp(ltmp_arr.select_lang_item,{lang:i,caption:available_langs[i]});
+	}
+	let select_lang=ltmp(ltmp_arr.select_lang,{items:available_langs_str});
+	$('.menu-bg').html(ltmp(ltmp_arr.menu_preset));
+	let preset_view=['index','portable','login','memo','accounts','assets','dao','market'];
+	for(let i in preset_view){
+		let view_name=preset_view[i];
+		if(typeof ltmp_arr['preset_view_'+view_name] !== 'undefined'){
+			$('.view-'+view_name).html(ltmp(ltmp_arr['preset_view_'+view_name])+select_lang);
+			if(typeof ltmp_arr['preset_view_'+view_name+'_title'] !== 'undefined'){
+				$('.view-'+view_name).attr('data-title',ltmp_arr['preset_view_'+view_name+'_title']);
 			}
 		}
+	}
+	callback();
+}
+function init_bindings(callback){
+	if(typeof callback==='undefined'){
+		callback=function(){};
 	}
 
 	$(window).resize(function(){
 		$('.absolute-view.menu-list').css('display','none');
-		/*
-		if('none'==$('.menu-list').css('float')){
-			$('.menu-list').css('display','none');
-		}
-		else{
-			$('.menu-list').css('display','block');
-		}
-		*/
 	});
 
 	if(null!=localStorage.getItem('users')){
@@ -6788,7 +6734,27 @@ $(document).ready(function(){
 		}
 	}
 
-	energy_radial = new ProgressBar.Circle('.energy-radial', {
+	clearTimeout(update_dgp_timer);
+	update_dgp_timer=setTimeout('update_dgp()',100);
+
+	/*
+	let isIOS = (/iPad|iPhone|iPod/.test(navigator.platform) ||
+	(navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) &&
+	!window.MSStream;
+	if(!isIOS){
+	}
+	*/
+	document.addEventListener('click', app_mouse, false);
+	document.addEventListener('tap', app_mouse, false);
+	document.addEventListener('keyup', app_keyboard, false);
+
+	callback();
+}
+function dom_bindings(callback){
+	if(typeof callback==='undefined'){
+		callback=function(){};
+	}
+	energy_radial=new ProgressBar.Circle('.energy-radial',{
 		strokeWidth:10,
 		color:'#093',
 		duration:2000,
@@ -7039,18 +7005,27 @@ $(document).ready(function(){
 			find_memo_key.css('display','none');
 		}
 	});
-
-	clearTimeout(update_dgp_timer);
-	update_dgp_timer=setTimeout('update_dgp()',100);
-
-	/*
-	let isIOS = (/iPad|iPhone|iPod/.test(navigator.platform) ||
-	(navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) &&
-	!window.MSStream;
-	if(!isIOS){
-	}
-	*/
-	document.addEventListener('click', app_mouse, false);
-	document.addEventListener('tap', app_mouse, false);
-	document.addEventListener('keyup', app_keyboard, false);
+	callback();
+}
+var energy_radial;
+$(document).ready(function(){
+	preset_template(function(){
+		init_bindings(function(){
+			dom_bindings(function(){
+				/*
+				if(!standalone){
+					var hash_load=window.location.hash;
+					if(''!=hash_load){
+						hash_load=hash_load.substr(1);
+						if(-1==hash_load.indexOf('/')){
+							if(0<$('.index[data-index='+hash_load+']').length){
+								$('body,html').animate({scrollTop:parseInt($('.index[data-index='+hash_load+']').offset().top) - 64 - 10},1000);
+							}
+						}
+					}
+				}
+				*/
+			});
+		});
+	});
 });
