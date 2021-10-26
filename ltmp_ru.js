@@ -859,7 +859,7 @@ var ltmp_ru_arr={
 					<span class="icon icon-margin hidden icon-color-green icon-check" rel="activate-booster"></span>
 				</p>
 
-				<div class="addon captions"><h3>Подсказка</h3><p>Бустер-коды продаются в партнёрских магазинах: (ссылка). Обновите страницу перед вводом кода, чтобы узнать точное количество получаемого капитала.</div>
+				<div class="addon captions"><h3>Подсказка</h3><p>Бустер-коды продаются в партнёрских магазинах: <a href="https://aabbcc.casa/booster/?account=" class="booster_set_account" target="_blank">AABBCC</a>, <a href="https://viz.media/booster-kod/" target="_blank">VIZ.Media</a>. Обновите страницу перед вводом кода, чтобы узнать точное количество получаемого капитала.</div>
 
 				<p><hr><a data-href="/assets/">%%default_return_link%%</a></p>
 
@@ -1124,8 +1124,10 @@ var ltmp_ru_arr={
 						<span class="input-caption">Шаблон:</span>
 						<select name="transfer-template" class="simple-rounded simple-rounded-size">
 							<option value="0" selected>Не используется</option>
-							<option value="1" data-account="xchng" data-tokens-amount-fee="10" data-memo="log:" data-memo-format="log:BITSHARES-LOGIN" data-memo-check="^log:([a-z0-9\-\.]*)$" data-memo-encrypt="false">XCHNG на BitShares</option>
-							<option value="2" data-account="gls.xchng" data-tokens-amount-fee="0" data-memo="log:" data-memo-format="log:GOLOS-LOGIN" data-memo-check="^log:([a-z0-9\-\.]*)$" data-memo-encrypt="false">XCHNG на GOLOS</option>
+							<option value="4" data-account="gph.xchng" data-tokens-amount-fee="10" data-memo="log:" data-memo-format="log:GRAPHENE-LOGIN" data-memo-check="^log:([a-z0-9\-\.]+)$" data-memo-encrypt="false">XCHNG на Graphene</option>
+							<option value="1" data-account="xchng" data-tokens-amount-fee="10" data-memo="log:" data-memo-format="log:BITSHARES-LOGIN" data-memo-check="^log:([a-z0-9\-\.]+)$" data-memo-encrypt="false">XCHNG на BitShares</option>
+							<option value="2" data-account="gls.xchng" data-tokens-amount-fee="0" data-memo="log:" data-memo-format="log:GOLOS-LOGIN" data-memo-check="^log:([a-z0-9\-\.]+)$" data-memo-encrypt="false">XCHNG на GOLOS</option>
+							<option value="3" data-account="vmp" data-tokens-amount-fee="0" data-memo="Mx" data-memo-format="Minter address" data-memo-check="^Mx([a-f0-9\-\.]+)$" data-memo-encrypt="false">VIZCHAIN на Minter</option>
 
 						</select>
 					</label>
