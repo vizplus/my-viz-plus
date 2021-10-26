@@ -40,6 +40,12 @@ function stop_booster_updates(){
 function booster_init(){
 	let page=$('.page-booster');
 	page.find('input[name="booster-account"]').val(current_user);
+	page.find('.booster_set_account').each(function(i,el){
+		let href=$(el).attr('href');
+		href=href.replace(/account=.*$/g,'account=');
+		$(el).attr('href',href+current_user);
+	});
+
 	setTimeout(function(){
 		booster_update_valuation();
 	},100);
