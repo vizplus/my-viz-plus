@@ -1,11 +1,7 @@
 var api_nodes=[
-	'https://node.viz.plus/',
-	'https://vizrpc.lexai.host/',
-	'https://viz-node.dpos.space/',
-	'https://node.viz.media/',
+	'https://api.viz.world/',
 	'https://viz.lexai.host/',
 	'https://node.viz.cx/',
-	'https://api.viz.world/',
 ];
 var default_api_node=api_nodes[0];
 var api_nodes_addon={'list':[]};
@@ -16,6 +12,9 @@ var invite_user='invite';
 var invite_active_key='5KcfoRuDfkhrLCxVcE9x51J6KN9aM9fpb78tLrvvFckxVV6FyFW';
 
 var standalone=false;
+if('vizplus.github.io'==document.location.hostname){
+	standalone=true;	
+}
 var standalone_fullpath='';
 var standalone_path='';
 var standalone_search='';
